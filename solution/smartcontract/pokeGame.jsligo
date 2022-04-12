@@ -5,28 +5,29 @@ type pokeMessage = {
 };
 
 type storage = {
-    pokeTraces : map<address, pokeMessage>,
-    owner : address
+    pokeTraces : map<address, pokeMessage>
 };
 
 type return_ = [list<operation>, storage];
 
-type returned_feedback = [address, string]; //address that gives feedback and a string message
+// type returned_feedback = [address, string]; //address that gives feedback and a string message
 
-type oracle_param = contract<returned_feedback>;
+// type oracle_param = contract<returned_feedback>;
 
 type parameter =
 | ["Poke"]
-| ["PokeAndGetFeedback", address]
-| ["PokeAndGetFeedbackCallback", returned_feedback]
-| ["GetFeedback",oracle_param];
+//| ["PokeAndGetFeedback", address]
+//| ["PokeAndGetFeedbackCallback", returned_feedback]
+//| ["GetFeedback",oracle_param];
+;
 
 let poke = (store : storage) : return_ => {
-    let feedbackMessage = {receiver : store.owner ,feedback: ""};
+    let feedbackMessage = {receiver : Tezos.self_address ,feedback: ""};
     return [  list([]) as list<operation>, {...store, 
         pokeTraces : Map.add(Tezos.source, feedbackMessage, store.pokeTraces) }]; 
 };
 
+/*
 let pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ => {
     
   //Prepares call to oracle
@@ -54,20 +55,21 @@ let pokeAndGetFeedbackCallback = ([feedback,store] : [returned_feedback , storag
 
 let getFeedback = ([contract_callback,store] : [contract<returned_feedback>,storage]): return_ => {
     let op : operation = Tezos.transaction(
-            [store.owner,"get slashed"], 
+            [store.owner,"the owner kissed you"], 
             (0 as mutez),
             contract_callback);   
     return [list([op]) ,store];
 };
+*/
 
 /* Main access point that dispatches to the entrypoints according to
 the smart contract parameter. */
 let main = ([action, store] : [parameter, storage]) : return_ => {
     return match (action, {
         Poke: () => poke(store),
-        PokeAndGetFeedback: (other : address) => pokeAndGetFeedback(other,store),
-        PokeAndGetFeedbackCallback: (feedback : returned_feedback) => pokeAndGetFeedbackCallback(feedback,store),
-        GetFeedback: (contract_callback: oracle_param)=> getFeedback(contract_callback,store)
+//        PokeAndGetFeedback: (other : address) => pokeAndGetFeedback(other,store),
+//        PokeAndGetFeedbackCallback: (feedback : returned_feedback) => pokeAndGetFeedbackCallback(feedback,store),
+//        GetFeedback: (contract_callback: oracle_param)=> getFeedback(contract_callback,store)
     } 
     )
 };
