@@ -17,7 +17,7 @@ In this second session, you will enhance your skills on :
 
 On the first version of the poke game, you were able to poke any deployed contract. Now, you will be able to receive a secret additional feedback if you ask the contract to poke another contract.
 
-Here is the new Poke sequence diagram
+## new Poke sequence diagram
 
 ```mermaid
 sequenceDiagram
@@ -171,6 +171,102 @@ Everything at the top-level was executed.
 
 
 ## Step 3 : do an inter contract call
+
+To simplify, we are deploying 2 versions of the same smartcontract to simulate inter-contract call and get the feedback message (cf. [sequence diagram](#new-poke-sequence-diagram))
+
+We will create a new poke function `PokeAndGetFeedback: (other : address)` that will have a second part function `PokeAndGetFeedbackCallback: (feedback : returned_feedback)` as callback.
+
+Then the function to call on the second contract is `GetFeedback: (contract_callback: oracle_param)`. 
+
+> Very often, the second contract is named `oracle` because genrally its storage is updated by offchain scheduler and other onchain contract are fetching information from it
+
+Edit the file pokeGame.jsligo, starting with the main function
+
+```javascript
+...
+
+type returned_feedback = [address, string]; //address that gives feedback and a string message
+
+type oracle_param = contract<returned_feedback>;
+
+type parameter =
+| ["Poke"]
+| ["PokeAndGetFeedback", address]
+| ["PokeAndGetFeedbackCallback", returned_feedback]
+| ["GetFeedback",oracle_param];
+
+...
+
+let main = ([action, store] : [parameter, storage]) : return_ => {
+    return match (action, {
+        Poke: () => poke(store),
+        PokeAndGetFeedback: (other : address) => pokeAndGetFeedback(other,store),
+        PokeAndGetFeedbackCallback: (feedback : returned_feedback) => pokeAndGetFeedbackCallback(feedback,store),
+        GetFeedback: (contract_callback: oracle_param)=> getFeedback(contract_callback,store)
+    } 
+    )
+};
+```
+
+Explanations : 
+- `type returned_feedback = [address, string]` the parameters of an oracle function always start with the address of the contract caller and followed by the return objects
+- `type oracle_param = contract<returned_feedback>` the oracle parameters need to be wrapped inside a typed contract 
+
+We need to write the missing functions, starting with `getFeedback`
+
+Add this new function (before the main method)
+```javascript
+let getFeedback = ([contract_callback,store] : [contract<returned_feedback>,storage]): return_ => {
+    let op : operation = Tezos.transaction(
+            [Tezos.self_address,"the owner kissed you"], 
+            (0 as mutez),
+            contract_callback);   
+    return [list([op]) ,store];
+};
+```
+
+- `([param1,param2] : [param1Type,param2Type])` actually jsligo is not able to use the several parameters definition in a row like this `(param1 : param1Type ,param2 : param2Type)`, you will require to use pairs as above
+- `Tezos.transaction(RETURNED_PARAMS,TEZ_COST,CALLBACK_CONTRACT)` the oracle function requires to return the value back to the contract caller that is passed already as first parameter
+- `return [list([op]) ,store]` this time, you return a list of operations to execute, there is no need to update the contract storage (but it is a mandatory return object)
+
+Add now, the first part of the function `pokeAndGetFeedback` 
+
+```javascript
+let pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ => {
+    
+  //Prepares call to oracle
+  let call_to_oracle = () : contract<oracle_param> => { 
+    return match(Tezos.get_entrypoint_opt("%getFeedback",oracleAddress) as option<contract<oracle_param>>,{ 
+      None : () => failwith("NO_ORACLE_FOUND"),
+      Some : (contract : contract<oracle_param>) => contract
+    });
+  };
+  
+  // Builds transaction
+  let op: operation = Tezos.transaction(
+    ((Tezos.self("%pokeAndGetFeedbackCallback") as contract<returned_feedback>)),
+    (0 as mutez),
+    call_to_oracle());
+    
+    return [  list([op])  , store];
+};
+```
+
+- `Tezos.get_entrypoint_opt("%getFeedback",oracleAddress)` you require to get the oracle contract address. Then you want to call a specific entrypoint of this contract. The function name will be always starting with `%` with always the first letter in lowercase (even if the code is different)
+- `Tezos.transaction(((Tezos.self("%pokeAndGetFeedbackCallback") as contract<returned_feedback>)),TEZ_COST,call_to_oracle())` The transaction takes as first param the entrypoint of for the callback that the oracle will use to answer the feedback, the tez cost and the oracle contract you got just above as transaction destination
+
+Let's write the last missing function `pokeAndGetFeedbackCallback` that will receive the feedback and finally store it
+
+```javascript
+let pokeAndGetFeedbackCallback = ([feedback,store] : [returned_feedback , storage]) : return_ => {
+    let feedbackMessage = {receiver : feedback[0] ,feedback: feedback[1]};
+    return [  list([]) as list<operation>, {...store, 
+        pokeTraces : Map.add(Tezos.source, feedbackMessage , store.pokeTraces) }]; 
+};
+```
+
+- `let feedbackMessage = {receiver : feedback[0] ,feedback: feedback[1]}` prepares the trace including the feedback message and the feedback contract creator
+- `{...store,pokeTraces : Map.add(Tezos.source, feedbackMessage , store.pokeTraces) }` add the new trace to the global trace map 
 
 ## Step 4 : Use views instead of inter-contract call
 
