@@ -5,7 +5,8 @@ type pokeMessage = {
 };
 
 type storage = {
-    pokeTraces : map<address, pokeMessage>
+    pokeTraces : map<address, pokeMessage>,
+    feedback : string
 };
 
 type return_ = [list<operation>, storage];
@@ -17,8 +18,9 @@ type oracle_param = contract<returned_feedback>;
 type parameter =
 | ["Poke"]
 | ["PokeAndGetFeedback", address]
-| ["PokeAndGetFeedbackCallback", returned_feedback]
-| ["GetFeedback",oracle_param];
+//| ["PokeAndGetFeedbackCallback", returned_feedback]
+//| ["GetFeedback",oracle_param]
+;
 
 let poke = (store : storage) : return_ => {
     let feedbackMessage = {receiver : Tezos.self_address ,feedback: ""};
@@ -28,24 +30,20 @@ let poke = (store : storage) : return_ => {
 
 
 let pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ => {
-    
-  //Prepares call to oracle
-  let call_to_oracle = () : contract<oracle_param> => { 
-    return match(Tezos.get_entrypoint_opt("%getFeedback",oracleAddress) as option<contract<oracle_param>>,{ 
-      None : () => failwith("NO_ORACLE_FOUND"),
-      Some : (contract : contract<oracle_param>) => contract
-    });
-  };
-  
-  // Builds transaction
-  let op: operation = Tezos.transaction(
-    ((Tezos.self("%pokeAndGetFeedbackCallback") as contract<returned_feedback>)),
-    (0 as mutez),
-    call_to_oracle());
-    
-    return [  list([op])  , store];
+  //Read the feedback view
+  let feedbackOpt : option<string> = Tezos.call_view("feedback", unit, oracleAddress);
+
+  match( feedbackOpt , {
+    Some : (feedback : string) => {
+        let feedbackMessage = {receiver : oracleAddress ,feedback: feedback};
+        return [  list([]) as list<operation>, {...store, 
+          pokeTraces : Map.add(Tezos.source, feedbackMessage , store.pokeTraces) }]; 
+        }, 
+    None : () => failwith("Cannot find view feedback on given oracle address")
+  });
 };
 
+/*
 let pokeAndGetFeedbackCallback = ([feedback,store] : [returned_feedback , storage]) : return_ => {
     let feedbackMessage = {receiver : feedback[0] ,feedback: feedback[1]};
     return [  list([]) as list<operation>, {...store, 
@@ -55,12 +53,12 @@ let pokeAndGetFeedbackCallback = ([feedback,store] : [returned_feedback , storag
 
 let getFeedback = ([contract_callback,store] : [contract<returned_feedback>,storage]): return_ => {
     let op : operation = Tezos.transaction(
-            [Tezos.self_address,"the owner kissed you"], 
+            [Tezos.self_address,store.feedback], 
             (0 as mutez),
             contract_callback);   
     return [list([op]) ,store];
 };
-
+*/
 
 /* Main access point that dispatches to the entrypoints according to
 the smart contract parameter. */
@@ -68,8 +66,11 @@ let main = ([action, store] : [parameter, storage]) : return_ => {
     return match (action, {
         Poke: () => poke(store),
         PokeAndGetFeedback: (other : address) => pokeAndGetFeedback(other,store),
-        PokeAndGetFeedbackCallback: (feedback : returned_feedback) => pokeAndGetFeedbackCallback(feedback,store),
-        GetFeedback: (contract_callback: oracle_param)=> getFeedback(contract_callback,store)
+       // PokeAndGetFeedbackCallback: (feedback : returned_feedback) => pokeAndGetFeedbackCallback(feedback,store),
+       //  GetFeedback: (contract_callback: oracle_param)=> getFeedback(contract_callback,store)
     } 
     )
 };
+
+// @view
+let feedback = ([_, store] : [unit, storage]) : string => { return store.feedback };

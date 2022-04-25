@@ -50,7 +50,8 @@ type pokeMessage = {
 };
 
 type storage = {
-    pokeTraces : map<address, pokeMessage>
+    pokeTraces : map<address, pokeMessage>,
+    feedback : string
 };
 ```
 
@@ -218,7 +219,7 @@ Add this new function (before the main method)
 ```javascript
 let getFeedback = ([contract_callback,store] : [contract<returned_feedback>,storage]): return_ => {
     let op : operation = Tezos.transaction(
-            [Tezos.self_address,"the owner kissed you"], 
+            [Tezos.self_address,store.feedback], 
             (0 as mutez),
             contract_callback);   
     return [list([op]) ,store];
@@ -293,19 +294,126 @@ sequenceDiagram
   Note left of SM: store feedback from P
 ```
 
+Comment previous functions `pokeAndGetFeedbackCallback` and `getFeedback`, also on `parameter` variant declaration and in the `match` of `main` function 
+
+Edit function `pokeAndGetFeedback` to do a read view operation instead of a transaction call
+
+```javascript
+let pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ => {
+  //Read the feedback view
+  let feedbackOpt : option<string> = Tezos.call_view("feedback", unit, oracleAddress);
+
+  match( feedbackOpt , {
+    Some : (feedback : string) => {
+        let feedbackMessage = {receiver : oracleAddress ,feedback: feedback};
+        return [  list([]) as list<operation>, {...store, 
+          pokeTraces : Map.add(Tezos.source, feedbackMessage , store.pokeTraces) }]; 
+        }, 
+    None : () => failwith("Cannot find view feedback on given oracle address")
+  });
+};
+```
+
+Declare the view at the end of the file. Do not forget the annotation @view in comments
+
+```javascript
+// @view
+let feedback = ([_, store] : [unit, storage]) : string => { return store.feedback };
+```
+
+Just compile the contract. Check if it passes correctly
+```bash 
+ligo compile contract pokeGame.jsligo  
+```
+
+(Optional) Write a unit test for the updated function `pokeAndGetFeedback`
+
 # :construction_worker:  Dapp 
 
 ## Step 1 : Reuse dapp from previous session
 
 https://github.com/marigold-dev/training-dapp-1/tree/main/solution/dapp
 
-## Step 2 : Adapt the application code
+## Step 2 : Redeploy new smart contract code
+
+Redeploy a new version of the smart contract (force it if necessary with --force). You can set `feedback` value to any action other than `kiss` :kissing:
+
+```bash
+ligo compile contract ./smartcontract/pokeGame.jsligo --output-file pokeGame.tz
+
+ligo compile storage ./smartcontract/pokeGame.jsligo '{pokeTraces : Map.empty as map<address, pokeMessage> , feedback : "kiss"}' --output-file pokeGameStorage.tz --entry-point main
+
+tezos-client originate contract mycontract transferring 0 from <ACCOUNT_KEY_NAME> running pokeGame.tz --init "$(cat pokeGameStorage.tz)" --burn-cap 1 --force
+```
+
+## Step 3 : Adapt the application code
+
+Keep the contract address to update the file dapp/src/App.tsx
+
+```javascript
+      setContracts((await contractsService.getSimilar({address:"KT1LqjJvz82zGqB7ExxCpCdjycKVjrsDFV4d" , includeStorage:true, sort:{desc:"id"}})));
+```
+
+Add new type at beginning of the file
+```javascript
+type pokeMessage = {
+  receiver : string,
+  feedback : string
+};
+```
+
+Add new React variable after `userBalance` definition
+
+```javascript
+  const [contractToPoke, setContractToPoke] = useState<string>("");
+```
+
+then change the poke function to set entrypoint to `pokeAndGetFeedback`
+
+```javascript
+ //poke
+  const poke = async (e :  React.FormEvent<HTMLFormElement>, contract : Contract) => {  
+    e.preventDefault(); 
+    let c : WalletContract = await Tezos.wallet.at(""+contract.address);
+    try {
+      const op = await c.methods.pokeAndGetFeedback(contractToPoke).send();
+      await op.confirmation();
+      console.log("Tx done");
+    } catch (error : any) {
+      console.log(error);
+      console.table(`Error: ${JSON.stringify(error, null, 2)}`);
+    }
+  };
+```
+
+Finally, change the display of the table
+
+```html
+<table><thead><tr><th>address</th><th>trace "contract - feedback - user"</th><th>action</th></tr></thead><tbody>
+    {contracts.map((contract) => <tr><td style={{borderStyle: "dotted"}}>{contract.address}</td><td style={{borderStyle: "dotted"}}>{(contract.storage !== null && contract.storage.pokeTraces !== null && Object.entries(contract.storage.pokeTraces).length > 0)?Object.keys(contract.storage.pokeTraces).map((k : string)=>contract.storage.pokeTraces[k].receiver+" "+contract.storage.pokeTraces[k].feedback+" "+k+","):""}</td><td style={{borderStyle: "dotted"}}><form onSubmit={(e) =>poke(e,contract)}><input type="text" onChange={e=>setContractToPoke(e.currentTarget.value)} placeholder='enter contract address here' /><button  type='submit'>Poke</button></form></td></tr>)}
+    </tbody></table>
+```
+
+Relaunch the app
+
+```bash
+cd dapp
+yarn run start
+```
+
+On the listed contract, choose your line and input the address of the contract you will receive a feedback. Click on `poke`
+
+![result](/doc/result.png)
+
+This time, the logged user will receive a feedback from a targeted contract (as input of the form) via any listed contract (the first column of the table).
+
+:point_up: Poke other developer's contract to discover their contract hidden feedback when you poke them
 
 
 # :palm_tree: Conclusion :sun_with_face:
 
 Now, you are able to call other contracts, use views and test you smart contract before deploying it
 
-On next training, you will learn how to upgrade a Smart contract, store and execute lambda function and use the Global table of constants
+On next training, you will learn how to upgrade a Smart contract, store and execute lambda function and use tickets
 
 [:arrow_right: NEXT](https://github.com/marigold-dev/training-dapp-3)
