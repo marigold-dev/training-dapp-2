@@ -268,7 +268,30 @@ let pokeAndGetFeedbackCallback = ([feedback,store] : [returned_feedback , storag
 - `let feedbackMessage = {receiver : feedback[0] ,feedback: feedback[1]}` prepares the trace including the feedback message and the feedback contract creator
 - `{...store,pokeTraces : Map.add(Tezos.source, feedbackMessage , store.pokeTraces) }` add the new trace to the global trace map 
 
+
+Just compile the contract. Check if it passes correctly
+```bash 
+ligo compile contract pokeGame.jsligo  
+```
+
+(Optional) Write a unit test for this new function `pokeAndGetFeedback`
+
 ## Step 4 : Use views instead of inter-contract call
+
+As you did on previous step, inter-contract calls can complexify a lot the business logic but not only, think about the cost : https://ligolang.org/docs/tutorials/inter-contract-calls/inter-contract-calls#a-note-on-complexity
+
+In our case, the oracle is providing a read only storage that can be replaced by a `view` instead of complex and costy callbacks
+
+> See documentation here : https://ligolang.org/docs/protocol/hangzhou#on-chain-views
+
+```mermaid
+sequenceDiagram
+  Note left of User: Prepare poke on P and get feedback
+  User->>SM: poke another contract P
+  SM-->>SM_P : feedback view read
+  SM_P-->>SM : feedback
+  Note left of SM: store feedback from P
+```
 
 # :construction_worker:  Dapp 
 
