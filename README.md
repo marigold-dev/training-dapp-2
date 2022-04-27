@@ -30,7 +30,7 @@ sequenceDiagram
 
 # :memo: Prerequisites
 
-There is nothing more than you neededon first session : https://github.com/marigold-dev/training-dapp-1#memo-prerequisites
+There is nothing more than you needed on first session : https://github.com/marigold-dev/training-dapp-1#memo-prerequisites
 
 # :scroll: Smart contract
 
@@ -111,7 +111,7 @@ let _ = Test.set_baker(faucet);
 let _ = Test.set_source(faucet);
 
 //contract origination
-let [taddr, _, _] = Test.originate(main, {pokeTraces : Map.empty as map<address, pokeMessage>}, 0 as tez);
+let [taddr, _, _] = Test.originate(main, {pokeTraces : Map.empty as map<address, pokeMessage> , feedback : "kiss"}, 0 as tez);
 let contr = Test.to_contract(taddr);
 let contrAddress = Tezos.address(contr);
 let _ = Test.log("contract deployed with values : ");
@@ -143,7 +143,7 @@ let _testPoke = (s : address) : bool => {
 
 Explanations : 
 - `#include "./pokeGame.jsligo"`  to include the source file in order to call functions and use object definitions
-- `Test.reset_state ( 2...` this creates two implicit accounts pn the test environment
+- `Test.reset_state ( 2...` this creates two implicit accounts on the test environment
 - `Test.nth_bootstrap_account` this return the nth account from the environment
 - `Test.originate(MAIN_FUNCTION, INIT_STORAGE, INIT_BALANCE)` will originate a smart contract into the environment
 - `Test.to_contract(taddr)` and `Tezos.address(contr)` are util functions to convert typed addresses, contract and contract addresses

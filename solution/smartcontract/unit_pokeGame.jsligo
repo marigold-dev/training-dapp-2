@@ -11,7 +11,7 @@ let _ = Test.set_baker(faucet);
 let _ = Test.set_source(faucet);
 
 //contract origination
-let [taddr, _, _] = Test.originate(main, {pokeTraces : Map.empty as map<address, pokeMessage>}, 0 as tez);
+let [taddr, _, _] = Test.originate(main, {pokeTraces : Map.empty as map<address, pokeMessage> , feedback : "kiss"}, 0 as tez);
 let contr = Test.to_contract(taddr);
 let contrAddress = Tezos.address(contr);
 let _ = Test.log("contract deployed with values : ");
