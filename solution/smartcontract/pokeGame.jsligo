@@ -1,21 +1,21 @@
 
-type pokeMessage = {
+export type pokeMessage = {
     receiver : address,
     feedback : string
 };
 
-type storage = {
+export type storage = {
     pokeTraces : map<address, pokeMessage>,
     feedback : string
 };
 
-type return_ = [list<operation>, storage];
+export type return_ = [list<operation>, storage];
 
 type returned_feedback = [address, string]; //address that gives feedback and a string message
 
 type oracle_param = contract<returned_feedback>;
 
-type parameter =
+export type parameter =
 | ["Poke"]
 | ["PokeAndGetFeedback", address]
 //| ["PokeAndGetFeedbackCallback", returned_feedback]
@@ -62,7 +62,7 @@ let getFeedback = ([contract_callback,store] : [contract<returned_feedback>,stor
 
 /* Main access point that dispatches to the entrypoints according to
 the smart contract parameter. */
-let main = ([action, store] : [parameter, storage]) : return_ => {
+export let main = ([action, store] : [parameter, storage]) : return_ => {
     return match (action, {
         Poke: () => poke(store),
         PokeAndGetFeedback: (other : address) => pokeAndGetFeedback(other,store),

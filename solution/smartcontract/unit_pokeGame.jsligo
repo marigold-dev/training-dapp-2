@@ -1,4 +1,6 @@
-#include "./pokeGame.jsligo"
+#import "./pokeGame.jsligo" "PokeGame"
+
+export type main_fn = (parameter : PokeGame.parameter, storage : PokeGame.storage) => PokeGame.return_ ;
 
 // reset state
 let _ = Test.reset_state ( 2 as nat, list([]) as list <tez> );
@@ -10,26 +12,27 @@ let _ = Test.log(Test.get_balance(sender1));
 let _ = Test.set_baker(faucet);
 let _ = Test.set_source(faucet);
 
-//contract origination
-let [taddr, _, _] = Test.originate(main, {pokeTraces : Map.empty as map<address, pokeMessage> , feedback : "kiss"}, 0 as tez);
-let contr = Test.to_contract(taddr);
-let contrAddress = Tezos.address(contr);
-let _ = Test.log("contract deployed with values : ");
-let _ = Test.log(contr);
-
 //functions
-let _testPoke = (s : address) : bool => {
+export let _testPoke = ([main , s] : [main_fn , address]) : bool => {
+
+    //contract origination
+    let [taddr, _, _] = Test.originate(main, {pokeTraces : Map.empty as map<address, PokeGame.pokeMessage> , feedback : "kiss"}, 0 as tez);
+    let contr = Test.to_contract(taddr);
+    let contrAddress = Tezos.address(contr);
+    let _ = Test.log("contract deployed with values : ");
+    let _ = Test.log(contr);
+
     Test.set_source(s);
 
     let status = Test.transfer_to_contract(contr, Poke(), 0 as tez);
     Test.log(status);
     
-    let store : storage = Test.get_storage(taddr);
+    let store : PokeGame.storage = Test.get_storage(taddr);
     Test.log(store);
 
     //check poke is registered
     match(Map.find_opt (s, store.pokeTraces), {
-        Some: (pokeMessage: pokeMessage) => { assert_with_error(pokeMessage.feedback == "","feedback "+pokeMessage.feedback+" is not equal to expected "+"(empty)"); assert_with_error(pokeMessage.receiver == contrAddress,"receiver is not equal"); return true; } ,
+        Some: (pokeMessage: PokeGame.pokeMessage) => { assert_with_error(pokeMessage.feedback == "","feedback "+pokeMessage.feedback+" is not equal to expected "+"(empty)"); assert_with_error(pokeMessage.receiver == contrAddress,"receiver is not equal"); return true; } ,
         None: () => false
        });
       
@@ -38,4 +41,4 @@ let _testPoke = (s : address) : bool => {
  
   //********** TESTS *************/
  
-  let testSender1Poke = _testPoke(sender1);
+  let testSender1Poke = _testPoke([PokeGame.main,sender1]);
