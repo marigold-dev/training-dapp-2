@@ -28,7 +28,7 @@ let poke = (store : storage) : return_ => {
         pokeTraces : Map.add(Tezos.source, feedbackMessage, store.pokeTraces) }]; 
 };
 
-
+// @no_mutation
 let pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ => {
   //Read the feedback view
   let feedbackOpt : option<string> = Tezos.call_view("feedback", unit, oracleAddress);
