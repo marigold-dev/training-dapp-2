@@ -190,7 +190,7 @@ touch mutation_pokeGame.jsligo
 
 Edit the file
 
-```ligo
+```javascript
 #import "./pokeGame.jsligo" "PokeGame"
 #import "./unit_pokeGame.jsligo" "PokeGameTest"
 
