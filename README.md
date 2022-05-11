@@ -13,7 +13,7 @@ Previouly, you learned how to create your first dapp.
 In this second session, you will enhance your skills on :
 - inter-contract calls
 - views
-- unit tests
+- unit & mutation tests
 
 On the first version of the poke game, you were able to poke any deployed contract. Now, you will be able to receive a secret additional feedback if you ask the contract to poke another contract.
 
@@ -171,7 +171,187 @@ Everything at the top-level was executed.
 ```
 
 
-## Step 3 : do an inter contract call
+
+## Step 3 : Write mutation tests :space_invader: 
+
+Ligo provides mutations testing through the Test library. You can see that like `test your tests`.
+Bugs, or mutants, are automatically inserted into your code. Your tests are run for each mutant.
+
+If your tests fail then the mutant is killed. If your tests passed, the mutant survived.
+The higher the percentage of mutants killed, the more effective your tests are.
+
+> Example of mutation for other languages : https://stryker-mutator.io/docs/mutation-testing-elements/supported-mutators
+
+Let's do this, create a file `mutation_pokeGame.jsligo`
+
+```bash
+touch mutation_pokeGame.jsligo
+```
+
+Edit the file
+
+```javascript
+#import "./pokeGame.jsligo" "PokeGame"
+#import "./unit_pokeGame.jsligo" "PokeGameTest"
+
+// reset state
+let _ = Test.reset_state ( 2 as nat, list([]) as list <tez> );
+let faucet = Test.nth_bootstrap_account(0);
+let sender1 : address = Test.nth_bootstrap_account(1);
+let _ = Test.log("Sender 1 has balance : ");
+let _ = Test.log(Test.get_balance(sender1));
+
+let _ = Test.set_baker(faucet);
+let _ = Test.set_source(faucet);
+
+
+let _tests = (main : PokeGameTest.main_fn) : bool => {
+  return PokeGameTest._testPoke([main,sender1]);
+};
+
+let _test_mutation = () : bool => {
+
+  let log = (mutations : list<[bool,mutation]>) : bool => {
+    if(List.size(mutations) == (1 as nat)) {Test.log("Mutation issue found"); Test.log(Option.unopt(List.head_opt(mutations))); return false;}
+    else return log(Option.unopt(List.tail_opt(mutations))); 
+  };
+
+  return match(Test.mutation_test_all(PokeGame.main,_tests) , list([
+  ([] : list<[bool,mutation]>) => {Test.log("No mutation errors"); return true;},
+  ([head,...tail] : list<[bool,mutation]>) => {
+    if(List.size(tail) == (0 as nat)) { Test.log(head); return false;}
+    else return log(tail); 
+    }
+  ]));
+}
+
+let test_mutation = _test_mutation(); 
+```
+
+Let's explain it first
+- `#import <SRC_FILE> <NAMESPACE>` : import your source code that will be mutated and your unit tests. For more information [module doc](https://ligolang.org/docs/language-basics/modules)
+- `let _tests = (main : PokeGameTest.main_fn) : bool` : you need to provide the test suite that will be run by the framework. As we don't have a main function, we just wrap it into a global function 
+- `let _test_mutation = () : bool =>` : this is the definition of the mutations tests
+- `Test.mutation_test_all(PokeGame.main,_tests)` : This will take the first argument as the source code to mutate and the second argument as unit test suite funtion to run over. It returns a list of mutations that succeed (if size > 0 then bad test coverage) or empty list (good, even mutants did not harm your code)
+- `let test_mutation = _test_mutation();` : as you see it works the same as ligo unit tests and will be run the same way
+
+As we need to point to some function from other files, we will have to expose this.
+
+Edit also the file pokeGame.jsligo, adding `export` keyword
+
+```javascript
+export type pokeMessage = {
+...
+export type storage = {
+...
+export type return_ = [list<operation>, storage];
+...
+export type parameter =
+...
+export let main = ([action, store] : [parameter, storage]) : return_ => {
+```
+
+and edit unit_pokeGame.jsligo too, this time, we will have to change a bit the code itself to be able to pass the source code to originate as parameter, that way, we saw that the mutation framework is able to inject different versions of it. Move contract origination code block inside the _testPoke function this time.
+
+```javascript
+#import "./pokeGame.jsligo" "PokeGame"
+
+export type main_fn = (parameter : PokeGame.parameter, storage : PokeGame.storage) => PokeGame.return_ ;
+
+// reset state
+let _ = Test.reset_state ( 2 as nat, list([]) as list <tez> );
+let faucet = Test.nth_bootstrap_account(0);
+let sender1 : address = Test.nth_bootstrap_account(1);
+let _ = Test.log("Sender 1 has balance : ");
+let _ = Test.log(Test.get_balance(sender1));
+
+let _ = Test.set_baker(faucet);
+let _ = Test.set_source(faucet);
+
+//functions
+export let _testPoke = ([main , s] : [main_fn , address]) : bool => {
+
+    //contract origination
+    let [taddr, _, _] = Test.originate(main, {pokeTraces : Map.empty as map<address, PokeGame.pokeMessage> , feedback : "kiss"}, 0 as tez);
+    let contr = Test.to_contract(taddr);
+    let contrAddress = Tezos.address(contr);
+    let _ = Test.log("contract deployed with values : ");
+    let _ = Test.log(contr);
+
+    Test.set_source(s);
+
+    let status = Test.transfer_to_contract(contr, Poke(), 0 as tez);
+    Test.log(status);
+    
+    let store : PokeGame.storage = Test.get_storage(taddr);
+    Test.log(store);
+
+    //check poke is registered
+    match(Map.find_opt (s, store.pokeTraces), {
+        Some: (pokeMessage: PokeGame.pokeMessage) => { assert_with_error(pokeMessage.feedback == "","feedback "+pokeMessage.feedback+" is not equal to expected "+"(empty)"); assert_with_error(pokeMessage.receiver == contrAddress,"receiver is not equal"); return true; } ,
+        None: () => false
+       });
+      
+  };
+  
+ 
+  //********** TESTS *************/
+ 
+  let testSender1Poke = _testPoke([PokeGame.main,sender1]);
+```
+
+All is ok, let run it
+
+```bash
+ligo run test mutation_pokeGame.jsligo
+```
+
+output :
+```logs
+...
+"Mutation issue found"
+(true , Mutation at: File "./pokeGame.jsligo", line 34, characters 53-63:
+ 33 |   //Read the feedback view
+ 34 |   let feedbackOpt : option<string> = Tezos.call_view("feedback", unit, oracleAddress);
+ 35 | 
+
+Replacing by: "feedbackfeedback".
+)
+Everything at the top-level was executed.
+- test_mutation exited with value false.
+```
+
+:space_invader: :space_invader: :space_invader:  Holy :shit:  , invaders !!! :space_invader: :space_invader: :space_invader:
+
+What happened ?
+
+The mutation has alterated a part of the code we did not test and we were not covering it, so the unit test passed.
+
+As we are lazy today, instead of fixing it, we will see that we can also tell the Library to ignore this.
+Go to your source file pokeGame.jsligo, and annotate the function `pokeAndGetFeedback` with `@no_mutation`
+
+```javascript
+// @no_mutation
+let pokeAndGetFeedback
+```
+
+Run again the mutation tests
+
+```bash
+ligo run test mutation_pokeGame.jsligo
+```
+
+Output 
+
+```logs
+"No mutation errors"
+Everything at the top-level was executed.
+- test_mutation exited with value true.
+```
+
+We won :sunglasses: :wine_glass: 
+
+## Step 4 : do an inter contract call
 
 To simplify, we are deploying 2 versions of the same smartcontract to simulate inter-contract call and get the feedback message (cf. [sequence diagram](#new-poke-sequence-diagram))
 
@@ -277,7 +457,7 @@ ligo compile contract pokeGame.jsligo
 
 (Optional) Write a unit test for this new function `pokeAndGetFeedback`
 
-## Step 4 : Use views instead of inter-contract call
+## Step 5 : Use views instead of inter-contract call
 
 As you did on previous step, inter-contract calls can complexify a lot the business logic but not only, think about the cost : https://ligolang.org/docs/tutorials/inter-contract-calls/inter-contract-calls#a-note-on-complexity
 
@@ -414,6 +594,6 @@ This time, the logged user will receive a feedback from a targeted contract (as 
 
 Now, you are able to call other contracts, use views and test you smart contract before deploying it
 
-On next training, you will learn how to upgrade a Smart contract, store and execute lambda function and use tickets
+On next training, you will learn how to upgrade a Smart contract, store/execute lambda function and use tickets
 
 [:arrow_right: NEXT](https://github.com/marigold-dev/training-dapp-3)
