@@ -237,7 +237,7 @@ Let's explain it first
 
 As we need to point to some function from other files, we will have to expose this.
 
-Edit also the file pokeGame.jsligo, adding `export` keyword
+Edit also the file `pokeGame.jsligo`, adding `export` keyword
 
 ```javascript
 export type pokeMessage = {
@@ -251,7 +251,7 @@ export type parameter =
 export let main = ([action, store] : [parameter, storage]) : return_ => {
 ```
 
-and edit unit_pokeGame.jsligo too, this time, we will have to change a bit the code itself to be able to pass the source code to originate as parameter, that way, we saw that the mutation framework is able to inject different versions of it. Move contract origination code block inside the _testPoke function this time.
+and edit `unit_pokeGame.jsligo` too, this time, we will have to change a bit the code itself to be able to pass the source code to originate as parameter, that way, we saw that the mutation framework is able to inject different versions of it. Move contract origination code block inside the _testPoke function this time.
 
 ```javascript
 #import "./pokeGame.jsligo" "PokeGame"
@@ -300,7 +300,7 @@ export let _testPoke = ([main , s] : [main_fn , address]) : bool => {
   let testSender1Poke = _testPoke([PokeGame.main,sender1]);
 ```
 
-All is ok, let run it
+All is ok, let's run it
 
 ```bash
 ligo run test mutation_pokeGame.jsligo
