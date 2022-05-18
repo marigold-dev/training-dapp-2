@@ -12,11 +12,11 @@ let _ = Test.set_baker(faucet);
 let _ = Test.set_source(faucet);
 
 
-let _tests = (main : PokeGameTest.main_fn) : bool => {
+const _tests = (main : PokeGameTest.main_fn) : bool => {
   return PokeGameTest._testPoke([main,sender1]);
 };
 
-let _test_mutation = () : bool => {
+const _test_mutation = () : bool => {
 
   let log = (mutations : list<[bool,mutation]>) : bool => {
     if(List.size(mutations) == (1 as nat)) {Test.log("Mutation issue found"); Test.log(Option.unopt(List.head_opt(mutations))); return false;}
@@ -32,4 +32,4 @@ let _test_mutation = () : bool => {
   ]));
 }
 
-let test_mutation = _test_mutation();
+const test_mutation = _test_mutation();

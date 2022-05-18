@@ -58,7 +58,7 @@ type storage = {
 Your poke function has changed
 
 ```javascript
-let poke = (store : storage) : return_ => {
+const poke = (store : storage) : return_ => {
     let feedbackMessage = {receiver : Tezos.self_address ,feedback: ""};
     return [  list([]) as list<operation>, {...store, 
         pokeTraces : Map.add(Tezos.source, feedbackMessage, store.pokeTraces) }]; 
@@ -127,7 +127,7 @@ let _ = Test.log("contract deployed with values : ");
 let _ = Test.log(contr);
 
 //functions
-let _testPoke = (s : address) : bool => {
+const _testPoke = (s : address) : bool => {
     Test.set_source(s);
 
     let status = Test.transfer_to_contract(contr, Poke(), 0 as tez);
@@ -147,7 +147,7 @@ let _testPoke = (s : address) : bool => {
  
   //********** TESTS *************/
  
-  let testSender1Poke = _testPoke(sender1);
+  const testSender1Poke = _testPoke(sender1);
 ```
 
 Explanations : 
@@ -220,7 +220,7 @@ type parameter =
 
 ...
 
-let main = ([action, store] : [parameter, storage]) : return_ => {
+const main = ([action, store] : [parameter, storage]) : return_ => {
     return match (action, {
         Poke: () => poke(store),
         PokeAndGetFeedback: (other : address) => pokeAndGetFeedback(other,store),
@@ -239,7 +239,7 @@ We need to write the missing functions, starting with `getFeedback`
 
 Add this new function (before the main method)
 ```javascript
-let getFeedback = ([contract_callback,store] : [contract<returned_feedback>,storage]): return_ => {
+const getFeedback = ([contract_callback,store] : [contract<returned_feedback>,storage]): return_ => {
     let op : operation = Tezos.transaction(
             [Tezos.self_address,store.feedback], 
             (0 as mutez),
@@ -255,7 +255,7 @@ let getFeedback = ([contract_callback,store] : [contract<returned_feedback>,stor
 Add now, the first part of the function `pokeAndGetFeedback` 
 
 ```javascript
-let pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ => {
+const pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ => {
     
   //Prepares call to oracle
   let call_to_oracle = () : contract<oracle_param> => { 
@@ -281,7 +281,7 @@ let pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ => 
 Let's write the last missing function `pokeAndGetFeedbackCallback` that will receive the feedback and finally store it
 
 ```javascript
-let pokeAndGetFeedbackCallback = ([feedback,store] : [returned_feedback , storage]) : return_ => {
+const pokeAndGetFeedbackCallback = ([feedback,store] : [returned_feedback , storage]) : return_ => {
     let feedbackMessage = {receiver : feedback[0] ,feedback: feedback[1]};
     return [  list([]) as list<operation>, {...store, 
         pokeTraces : Map.add(Tezos.source, feedbackMessage , store.pokeTraces) }]; 
@@ -322,7 +322,7 @@ Comment previous functions `pokeAndGetFeedbackCallback` and `getFeedback`, also 
 Edit function `pokeAndGetFeedback` to do a read view operation instead of a transaction call
 
 ```javascript
-let pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ => {
+const pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ => {
   //Read the feedback view
   let feedbackOpt : option<string> = Tezos.call_view("feedback", unit, oracleAddress);
 
@@ -341,7 +341,7 @@ Declare the view at the end of the file. Do not forget the annotation @view in c
 
 ```javascript
 // @view
-let feedback = ([_, store] : [unit, storage]) : string => { return store.feedback };
+const feedback = ([_, store] : [unit, storage]) : string => { return store.feedback };
 ```
 
 Just compile the contract. Check if it passes correctly
@@ -386,11 +386,11 @@ let _ = Test.set_baker(faucet);
 let _ = Test.set_source(faucet);
 
 
-let _tests = (main : PokeGameTest.main_fn) : bool => {
+const _tests = (main : PokeGameTest.main_fn) : bool => {
   return PokeGameTest._testPoke([main,sender1]);
 };
 
-let _test_mutation = () : bool => {
+const _test_mutation = () : bool => {
 
   let log = (mutations : list<[bool,mutation]>) : bool => {
     if(List.size(mutations) == (1 as nat)) {Test.log("Mutation issue found"); Test.log(Option.unopt(List.head_opt(mutations))); return false;}
@@ -406,7 +406,7 @@ let _test_mutation = () : bool => {
   ]));
 }
 
-let test_mutation = _test_mutation(); 
+const test_mutation = _test_mutation(); 
 ```
 
 Let's explain it first
@@ -478,7 +478,7 @@ export let _testPoke = ([main , s] : [main_fn , address]) : bool => {
  
   //********** TESTS *************/
  
-  let testSender1Poke = _testPoke([PokeGame.main,sender1]);
+  const testSender1Poke = _testPoke([PokeGame.main,sender1]);
 ```
 
 All is ok, let's run it
@@ -513,7 +513,7 @@ Go to your source file pokeGame.jsligo, and annotate the function `pokeAndGetFee
 
 ```javascript
 // @no_mutation
-let pokeAndGetFeedback
+export const pokeAndGetFeedback
 ```
 
 Run again the mutation tests

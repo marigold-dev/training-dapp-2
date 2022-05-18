@@ -13,7 +13,7 @@ let _ = Test.set_baker(faucet);
 let _ = Test.set_source(faucet);
 
 //functions
-export let _testPoke = ([main , s] : [main_fn , address]) : bool => {
+export const _testPoke = ([main , s] : [main_fn , address]) : bool => {
 
     //contract origination
     let [taddr, _, _] = Test.originate(main, {pokeTraces : Map.empty as map<address, PokeGame.pokeMessage> , feedback : "kiss"}, 0 as tez);
@@ -44,4 +44,4 @@ export let _testPoke = ([main , s] : [main_fn , address]) : bool => {
  
   //********** TESTS *************/
  
-  let testSender1Poke = _testPoke([PokeGame.main,sender1]);
+  const testSender1Poke = _testPoke([PokeGame.main,sender1]);
