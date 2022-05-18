@@ -584,7 +584,7 @@ then change the poke function to set entrypoint to `pokeAndGetFeedback`
     try {
       const op = await c.methods.pokeAndGetFeedback(contractToPoke).send();
       await op.confirmation();
-      console.log("Tx done");
+      alert("Tx done");
     } catch (error : any) {
       console.log(error);
       console.table(`Error: ${JSON.stringify(error, null, 2)}`);
