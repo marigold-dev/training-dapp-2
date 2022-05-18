@@ -31,8 +31,11 @@ export let _testPoke = ([main , s] : [main_fn , address]) : bool => {
     Test.log(store);
 
     //check poke is registered
-    match(Map.find_opt (s, store.pokeTraces), {
-        Some: (pokeMessage: PokeGame.pokeMessage) => { assert_with_error(pokeMessage.feedback == "","feedback "+pokeMessage.feedback+" is not equal to expected "+"(empty)"); assert_with_error(pokeMessage.receiver == contrAddress,"receiver is not equal"); return true; } ,
+    return match(Map.find_opt (s, store.pokeTraces), {
+        Some: (pokeMessage: PokeGame.pokeMessage) => { 
+            assert_with_error(pokeMessage.feedback == "","feedback "+pokeMessage.feedback+" is not equal to expected "+"(empty)"); 
+            assert_with_error(pokeMessage.receiver == contrAddress,"receiver is not equal");
+            return true; } ,
         None: () => false
        });
       
