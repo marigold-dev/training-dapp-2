@@ -84,6 +84,15 @@ We will write the pokeAndGetFeedback function later, let pass to unit testing
 
 ## Step 2 : Write unit tests
 
+We will test only the poke function for now
+
+```mermaid
+sequenceDiagram
+  Note left of User: Prepare poke
+  User->>SM: poke 
+  Note left of SM: store user and self contract address with no feedback
+```
+
 On the smartcontract repository , create a new file 
 
 ```bash
@@ -353,6 +362,18 @@ We won :sunglasses: :wine_glass:
 
 ## Step 4 : do an inter contract call
 
+```mermaid
+sequenceDiagram
+  Note left of User: Prepare poke on P and get feedback
+  User->>SM: poke another contract P
+  Note right of SM: PokeAndGetFeedback is called
+  SM->>SM_P : get feedback
+  Note right of SM_P: GetFeedback is called
+  SM_P->>SM : send feedback
+  Note left of SM: store feedback from P
+  Note left of SM: PokeAndGetFeedbackCallback is called
+```
+
 To simplify, we are deploying 2 versions of the same smartcontract to simulate inter-contract call and get the feedback message (cf. [sequence diagram](#new-poke-sequence-diagram))
 
 We will create a new poke function `PokeAndGetFeedback: (other : address)` that will have a second part function `PokeAndGetFeedbackCallback: (feedback : returned_feedback)` as callback.
@@ -469,6 +490,7 @@ In our case, the oracle is providing a read only storage that can be replaced by
 sequenceDiagram
   Note left of User: Prepare poke on P and get feedback
   User->>SM: poke another contract P
+  Note right of SM: PokeAndGetFeedback is called
   SM-->>SM_P : feedback view read
   SM_P-->>SM : feedback
   Note left of SM: store feedback from P
