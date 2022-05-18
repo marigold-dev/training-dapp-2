@@ -90,7 +90,7 @@ We will test only the poke function for now
 sequenceDiagram
   Note left of User: Prepare poke
   User->>SM: poke 
-  Note left of SM: store user and self contract address with no feedback
+  Note right of SM: store user and self contract address with no feedback
 ```
 
 On the smartcontract repository , create a new file 
