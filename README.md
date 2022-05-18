@@ -370,8 +370,8 @@ sequenceDiagram
   SM->>SM_P : get feedback
   Note right of SM_P: GetFeedback is called
   SM_P->>SM : send feedback
-  Note left of SM: store feedback from P
   Note left of SM: PokeAndGetFeedbackCallback is called
+  Note left of SM: store feedback from P
 ```
 
 To simplify, we are deploying 2 versions of the same smartcontract to simulate inter-contract call and get the feedback message (cf. [sequence diagram](#new-poke-sequence-diagram))
