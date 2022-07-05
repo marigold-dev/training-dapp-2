@@ -43,7 +43,7 @@ Change the storage to do so :
 - if you poke, you just register the contract's owner address and no feedback
 - if you poke and get feedback from another contract, then your register the other contract owner address and its feedback 
 
-```javascript
+```jsligo
 type pokeMessage = {
     receiver : address,
     feedback : string
@@ -57,11 +57,11 @@ type storage = {
 
 Your poke function has changed
 
-```javascript
+```jsligo
 const poke = (store : storage) : return_ => {
-    let feedbackMessage = {receiver : Tezos.self_address ,feedback: ""};
+    let feedbackMessage = {receiver : Tezos.get_self_address() ,feedback: ""};
     return [  list([]) as list<operation>, {...store, 
-        pokeTraces : Map.add(Tezos.source, feedbackMessage, store.pokeTraces) }]; 
+        pokeTraces : Map.add(Tezos.get_source(), feedbackMessage, store.pokeTraces) }]; 
 };
 ```
 
@@ -72,7 +72,7 @@ For more information about [Map](https://ligolang.org/docs/language-basics/maps-
 
 It is not really needed to do a `Record`, but we wanted to introduce [object structure manipulation](https://ligolang.org/docs/language-basics/maps-records#records)  
 
-`Tezos.self_address` is a native function that return the currently running contract address. Have a look on [Tezos native functions](https://ligolang.org/docs/reference/current-reference) 
+`Tezos.get_self_address` is a native function that return the currently running contract address. Have a look on [Tezos native functions](https://ligolang.org/docs/reference/current-reference) 
 
 Then compile your contract
 
@@ -106,25 +106,25 @@ touch unit_pokeGame.jsligo
 
 Edit the file
 
-```javascript
+```jsligo
 #include "./pokeGame.jsligo"
 
 // reset state
-let _ = Test.reset_state ( 2 as nat, list([]) as list <tez> );
-let faucet = Test.nth_bootstrap_account(0);
-let sender1 : address = Test.nth_bootstrap_account(1);
-let _ = Test.log("Sender 1 has balance : ");
-let _ = Test.log(Test.get_balance(sender1));
+const _ = Test.reset_state ( 2 as nat, list([]) as list <tez> );
+const faucet = Test.nth_bootstrap_account(0);
+const sender1 : address = Test.nth_bootstrap_account(1);
+const _ = Test.log("Sender 1 has balance : ");
+const _ = Test.log(Test.get_balance(sender1));
 
-let _ = Test.set_baker(faucet);
-let _ = Test.set_source(faucet);
+const _ = Test.set_baker(faucet);
+const _ = Test.set_source(faucet);
 
 //contract origination
-let [taddr, _, _] = Test.originate(main, {pokeTraces : Map.empty as map<address, pokeMessage> , feedback : "kiss"}, 0 as tez);
-let contr = Test.to_contract(taddr);
-let contrAddress = Tezos.address(contr);
-let _ = Test.log("contract deployed with values : ");
-let _ = Test.log(contr);
+const [taddr, _, _] = Test.originate(main, {pokeTraces : Map.empty as map<address, pokeMessage> , feedback : "kiss"}, 0 as tez);
+const contr = Test.to_contract(taddr);
+const contrAddress = Tezos.address(contr);
+const _ = Test.log("contract deployed with values : ");
+const _ = Test.log(contr);
 
 //functions
 const _testPoke = (s : address) : bool => {
@@ -205,7 +205,7 @@ Then the function to call on the second contract is `GetFeedback: (contract_call
 
 Edit the file pokeGame.jsligo, starting with the main function
 
-```javascript
+```jsligo
 ...
 
 type returned_feedback = [address, string]; //address that gives feedback and a string message
@@ -238,10 +238,10 @@ Explanations :
 We need to write the missing functions, starting with `getFeedback`
 
 Add this new function (before the main method)
-```javascript
+```jsligo
 const getFeedback = ([contract_callback,store] : [contract<returned_feedback>,storage]): return_ => {
     let op : operation = Tezos.transaction(
-            [Tezos.self_address,store.feedback], 
+            [Tezos.get_self_address(),store.feedback], 
             (0 as mutez),
             contract_callback);   
     return [list([op]) ,store];
@@ -254,7 +254,7 @@ const getFeedback = ([contract_callback,store] : [contract<returned_feedback>,st
 
 Add now, the first part of the function `pokeAndGetFeedback` 
 
-```javascript
+```jsligo
 const pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ => {
     
   //Prepares call to oracle
@@ -280,16 +280,16 @@ const pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ =
 
 Let's write the last missing function `pokeAndGetFeedbackCallback` that will receive the feedback and finally store it
 
-```javascript
+```jsligo
 const pokeAndGetFeedbackCallback = ([feedback,store] : [returned_feedback , storage]) : return_ => {
     let feedbackMessage = {receiver : feedback[0] ,feedback: feedback[1]};
     return [  list([]) as list<operation>, {...store, 
-        pokeTraces : Map.add(Tezos.source, feedbackMessage , store.pokeTraces) }]; 
+        pokeTraces : Map.add(Tezos.get_source(), feedbackMessage , store.pokeTraces) }]; 
 };
 ```
 
 - `let feedbackMessage = {receiver : feedback[0] ,feedback: feedback[1]}` prepares the trace including the feedback message and the feedback contract creator
-- `{...store,pokeTraces : Map.add(Tezos.source, feedbackMessage , store.pokeTraces) }` add the new trace to the global trace map 
+- `{...store,pokeTraces : Map.add(Tezos.get_source(), feedbackMessage , store.pokeTraces) }` add the new trace to the global trace map 
 
 
 Just compile the contract. Check if it passes correctly
@@ -317,11 +317,14 @@ sequenceDiagram
   Note left of SM: store feedback from P
 ```
 
-Comment previous functions `pokeAndGetFeedbackCallback` and `getFeedback`, also on `parameter` variant declaration and in the `match` of `main` function 
+Comment all of this :
+- previous functions `pokeAndGetFeedbackCallback` and `getFeedback`
+- `parameter` variant useless declarations
+- in the `match` of `main` function, comment the useless cases
 
 Edit function `pokeAndGetFeedback` to do a read view operation instead of a transaction call
 
-```javascript
+```jsligo
 const pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ => {
   //Read the feedback view
   let feedbackOpt : option<string> = Tezos.call_view("feedback", unit, oracleAddress);
@@ -330,7 +333,7 @@ const pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ =
     Some : (feedback : string) => {
         let feedbackMessage = {receiver : oracleAddress ,feedback: feedback};
         return [  list([]) as list<operation>, {...store, 
-          pokeTraces : Map.add(Tezos.source, feedbackMessage , store.pokeTraces) }]; 
+          pokeTraces : Map.add(Tezos.get_source(), feedbackMessage , store.pokeTraces) }]; 
         }, 
     None : () => failwith("Cannot find view feedback on given oracle address")
   });
@@ -339,7 +342,7 @@ const pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ =
 
 Declare the view at the end of the file. Do not forget the annotation @view in comments
 
-```javascript
+```jsligo
 // @view
 const feedback = ([_, store] : [unit, storage]) : string => { return store.feedback };
 ```
@@ -371,7 +374,7 @@ touch mutation_pokeGame.jsligo
 
 Edit the file
 
-```javascript
+```jsligo
 #import "./pokeGame.jsligo" "PokeGame"
 #import "./unit_pokeGame.jsligo" "PokeGameTest"
 
@@ -420,7 +423,7 @@ As we need to point to some function from other files, we will have to expose th
 
 Edit also the file `pokeGame.jsligo`, adding `export` keyword
 
-```javascript
+```jsligo
 export type pokeMessage = {
 ...
 export type storage = {
@@ -434,7 +437,7 @@ export let main = ([action, store] : [parameter, storage]) : return_ => {
 
 and edit `unit_pokeGame.jsligo` too, this time, we will have to change a bit the code itself to be able to pass the source code to originate as parameter, that way, we saw that the mutation framework is able to inject different versions of it. Move contract origination code block inside the _testPoke function this time.
 
-```javascript
+```jsligo
 #import "./pokeGame.jsligo" "PokeGame"
 
 export type main_fn = (parameter : PokeGame.parameter, storage : PokeGame.storage) => PokeGame.return_ ;
@@ -511,7 +514,7 @@ The mutation has alterated a part of the code we did not test and we were not co
 As we are lazy today, instead of fixing it, we will see that we can also tell the Library to ignore this.
 Go to your source file pokeGame.jsligo, and annotate the function `pokeAndGetFeedback` with `@no_mutation`
 
-```javascript
+```jsligo
 // @no_mutation
 export const pokeAndGetFeedback
 ```
