@@ -36,6 +36,7 @@ const getFeedback = ([contract_callback,store] : [contract<returned_feedback>,st
     return [list([op]) ,store];
 };*/
 
+// @no_mutation
 const pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ => {
   //Read the feedback view
   let feedbackOpt : option<string> = Tezos.call_view("feedback", unit, oracleAddress);
