@@ -3,14 +3,14 @@
 export type main_fn = (parameter : PokeGame.parameter, storage : PokeGame.storage) => PokeGame.return_ ;
 
 // reset state
-let _ = Test.reset_state ( 2 as nat, list([]) as list <tez> );
-let faucet = Test.nth_bootstrap_account(0);
-let sender1 : address = Test.nth_bootstrap_account(1);
-let _ = Test.log("Sender 1 has balance : ");
-let _ = Test.log(Test.get_balance(sender1));
+const _ = Test.reset_state ( 2 as nat, list([]) as list <tez> );
+const faucet = Test.nth_bootstrap_account(0);
+const sender1 : address = Test.nth_bootstrap_account(1);
+const _ = Test.log("Sender 1 has balance : ");
+const _ = Test.log(Test.get_balance(sender1));
 
-let _ = Test.set_baker(faucet);
-let _ = Test.set_source(faucet);
+const _ = Test.set_baker(faucet);
+const _ = Test.set_source(faucet);
 
 //functions
 export const _testPoke = ([main , s] : [main_fn , address]) : bool => {
@@ -31,11 +31,8 @@ export const _testPoke = ([main , s] : [main_fn , address]) : bool => {
     Test.log(store);
 
     //check poke is registered
-    return match(Map.find_opt (s, store.pokeTraces), {
-        Some: (pokeMessage: PokeGame.pokeMessage) => { 
-            assert_with_error(pokeMessage.feedback == "","feedback "+pokeMessage.feedback+" is not equal to expected "+"(empty)"); 
-            assert_with_error(pokeMessage.receiver == contrAddress,"receiver is not equal");
-            return true; } ,
+    match(Map.find_opt (s, store.pokeTraces), {
+        Some: (pokeMessage: PokeGame.pokeMessage) => { assert_with_error(pokeMessage.feedback == "","feedback "+pokeMessage.feedback+" is not equal to expected "+"(empty)"); assert_with_error(pokeMessage.receiver == contrAddress,"receiver is not equal"); return true; } ,
         None: () => false
        });
       
