@@ -130,7 +130,7 @@ const _ = Test.log(contr);
 const _testPoke = (s : address) : bool => {
     Test.set_source(s);
 
-    let status = Test.transfer_to_contract(contr, Poke(), 0 as tez);
+    let status = Test.transfer_to_contract(contr, Poke() as PokeGame.parameter, 0 as tez);
     Test.log(status);
     
     let store : storage = Test.get_storage(taddr);
@@ -464,7 +464,7 @@ export let _testPoke = ([main , s] : [main_fn , address]) : bool => {
 
     Test.set_source(s);
 
-    let status = Test.transfer_to_contract(contr, Poke(), 0 as tez);
+    let status = Test.transfer_to_contract(contr, Poke() as PokeGame.parameter, 0 as tez);
     Test.log(status);
     
     let store : PokeGame.storage = Test.get_storage(taddr);
