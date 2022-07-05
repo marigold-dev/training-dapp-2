@@ -548,19 +548,19 @@ https://github.com/marigold-dev/training-dapp-1/tree/main/solution/dapp
 Redeploy a new version of the smart contract (force it if necessary with --force). You can set `feedback` value to any action other than `kiss` :kissing:
 
 ```bash
-ligo compile contract ./smartcontract/pokeGame.jsligo --output-file pokeGame.tz
+ligo compile contract ./smartcontract/pokeGame.jsligo --output-file pokeGame.tz --protocol jakarta
 
-ligo compile storage ./smartcontract/pokeGame.jsligo '{pokeTraces : Map.empty as map<address, pokeMessage> , feedback : "kiss"}' --output-file pokeGameStorage.tz --entry-point main
+ligo compile storage ./smartcontract/pokeGame.jsligo '{pokeTraces : Map.empty as map<address, pokeMessage> , feedback : "kiss"}' --output-file pokeGameStorage.tz --protocol jakarta
 
 tezos-client originate contract mycontract transferring 0 from <ACCOUNT_KEY_NAME> running pokeGame.tz --init "$(cat pokeGameStorage.tz)" --burn-cap 1 --force
 ```
 
 ## Step 3 : Adapt the application code
 
-Keep the contract address to update the file dapp/src/App.tsx
+Copy the new contract address `KT1***` to update the file dapp/src/App.tsx
 
 ```javascript
-      setContracts((await contractsService.getSimilar({address:"KT1LqjJvz82zGqB7ExxCpCdjycKVjrsDFV4d" , includeStorage:true, sort:{desc:"id"}})));
+      setContracts((await contractsService.getSimilar({address:"KT1N9tw4L7kjE8boFfmm7GbejS2i2GYnShG9" , includeStorage:true, sort:{desc:"id"}})));
 ```
 
 Add new type at beginning of the file

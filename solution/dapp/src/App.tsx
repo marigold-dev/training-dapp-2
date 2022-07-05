@@ -12,7 +12,7 @@ type pokeMessage = {
 
 function App() {
   
-  const [Tezos, setTezos] = useState<TezosToolkit>(new TezosToolkit("https://ithacanet.tezos.marigold.dev"));
+  const [Tezos, setTezos] = useState<TezosToolkit>(new TezosToolkit("https://jakartanet.tezos.marigold.dev"));
   const [wallet, setWallet] = useState<any>(null);
   const [userAddress, setUserAddress] = useState<string>("");
   const [userBalance, setUserBalance] = useState<number>(0);
@@ -20,12 +20,12 @@ function App() {
   const [contractToPoke, setContractToPoke] = useState<string>("");
   
   //tzkt
-  const contractsService = new ContractsService( {baseUrl: "https://api.ithacanet.tzkt.io" , version : "", withCredentials : false});
+  const contractsService = new ContractsService( {baseUrl: "https://api.jakartanet.tzkt.io" , version : "", withCredentials : false});
   const [contracts, setContracts] = useState<Array<Contract>>([]);
   
   const fetchContracts = () => {
     (async () => {
-      setContracts((await contractsService.getSimilar({address:"KT1FmxtqdHtVCFvmLfQhwieDa6eGVPpD9bav" , includeStorage:true, sort:{desc:"id"}})));
+      setContracts((await contractsService.getSimilar({address:"KT1N9tw4L7kjE8boFfmm7GbejS2i2GYnShG9" , includeStorage:true, sort:{desc:"id"}})));
     })();
   }
   
