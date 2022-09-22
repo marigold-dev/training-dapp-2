@@ -653,6 +653,6 @@ Refresh manually clicking on `Fetch contracts` button
 
 Now, you are able to call other contracts, use views and test you smart contract before deploying it
 
-On next training, you will learn how to upgrade a Smart contract, store/execute lambda function and use tickets
+On next training, you will learn how to use tickets
 
 [:arrow_right: NEXT](https://github.com/marigold-dev/training-dapp-3)
