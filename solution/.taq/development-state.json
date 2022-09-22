@@ -1,0 +1,134 @@
+{
+    "operations": {},
+    "tasks": {
+        "@taqueria/plugin-flextesa.list accounts.1663575043480": {
+            "task": "list accounts",
+            "plugin": "@taqueria/plugin-flextesa",
+            "time": 1663575043480,
+            "output": [
+                {
+                    "account": "bob",
+                    "balance": "3000 ꜩ",
+                    "address": "tz1aSkwEot3L2kmUvcoxzjMomb9mvBNuzFK6"
+                },
+                {
+                    "account": "alice",
+                    "balance": "3000 ꜩ",
+                    "address": "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb"
+                },
+                {
+                    "account": "john",
+                    "balance": "3000 ꜩ",
+                    "address": "tz1Zwoh1QCVAvJ4sVTojMp9pLYp6Ji4NoZy6"
+                },
+                {
+                    "account": "jane",
+                    "balance": "3000 ꜩ",
+                    "address": "tz1aHUAC4oviwJuZF1EvVSvFz7cu9KMNYBph"
+                },
+                {
+                    "account": "joe",
+                    "balance": "3000 ꜩ",
+                    "address": "tz1MVGjgD1YtAPwohsSfk8i3ZiT1yEGM2YXB"
+                }
+            ]
+        },
+        "@taqueria/plugin-taquito.deploy.1663575078107": {
+            "task": "deploy",
+            "plugin": "@taqueria/plugin-taquito",
+            "time": 1663575078107,
+            "output": [
+                {
+                    "contract": "pokeGame",
+                    "address": "KT1B2wy44bqZvDDqA1NPNvYU69S8e44aeVYY",
+                    "alias": "pokeGame",
+                    "destination": "local"
+                }
+            ]
+        },
+        "@taqueria/plugin-ligo.compile.1663838453767": {
+            "task": "compile",
+            "plugin": "@taqueria/plugin-ligo",
+            "time": 1663838453767,
+            "output": [
+                {
+                    "contract": "pokeGame.jsligo",
+                    "artifact": "artifacts/pokeGame.tz"
+                },
+                {
+                    "contract": "pokeGame.storages.jsligo",
+                    "artifact": "artifacts/pokeGame.default_storage.tz\n"
+                }
+            ]
+        },
+        "@taqueria/plugin-ligo.compile.1663838717045": {
+            "task": "compile",
+            "plugin": "@taqueria/plugin-ligo",
+            "time": 1663838717045,
+            "output": [
+                {
+                    "contract": "pokeGame.jsligo",
+                    "artifact": "artifacts/pokeGame.tz"
+                },
+                {
+                    "contract": "pokeGame.storages.jsligo",
+                    "artifact": "artifacts/pokeGame.default_storage.tz\n"
+                }
+            ]
+        },
+        "@taqueria/plugin-ligo.compile.1663838868804": {
+            "task": "compile",
+            "plugin": "@taqueria/plugin-ligo",
+            "time": 1663838868804,
+            "output": [
+                {
+                    "contract": "pokeGame.jsligo",
+                    "artifact": "Not compiled"
+                }
+            ]
+        },
+        "@taqueria/plugin-ligo.compile.1663838886384": {
+            "task": "compile",
+            "plugin": "@taqueria/plugin-ligo",
+            "time": 1663838886384,
+            "output": [
+                {
+                    "contract": "pokeGame.jsligo",
+                    "artifact": "artifacts/pokeGame.tz"
+                },
+                {
+                    "contract": "pokeGame.storages.jsligo",
+                    "artifact": "artifacts/pokeGame.default_storage.tz\n"
+                }
+            ]
+        },
+        "@taqueria/plugin-ligo.compile.1663840388375": {
+            "task": "compile",
+            "plugin": "@taqueria/plugin-ligo",
+            "time": 1663840388375,
+            "output": [
+                {
+                    "contract": "pokeGame.jsligo",
+                    "artifact": "artifacts/pokeGame.tz"
+                },
+                {
+                    "contract": "pokeGame.storages.jsligo",
+                    "artifact": "artifacts/pokeGame.default_storage.tz\n"
+                }
+            ]
+        },
+        "@taqueria/plugin-taquito.deploy.1663840398547": {
+            "task": "deploy",
+            "plugin": "@taqueria/plugin-taquito",
+            "time": 1663840398547,
+            "output": [
+                {
+                    "contract": "pokeGame.tz",
+                    "address": "KT1Uri5AcWf3ZtQc2Rny2Dbg3JnfwkeHFU1X",
+                    "alias": "pokeGame",
+                    "destination": "local"
+                }
+            ]
+        }
+    }
+}

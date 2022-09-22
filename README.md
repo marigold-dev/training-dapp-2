@@ -34,16 +34,26 @@ There is nothing more than you needed on first session : https://github.com/mari
 
 # :scroll: Smart contract
 
-## Step 1 : Reuse the contract from previous session
+## Step 1 : Reuse the project from previous session
 
-https://github.com/marigold-dev/training-dapp-1/blob/main/solution/smartcontract/pokeGame.jsligo
+Start from previous project  : https://github.com/marigold-dev/training-dapp-1/blob/main/solution
+
+To get libraries ready, run :
+
+```bash
+yarn install
+```
+
+Reuse the previous smart contract : https://github.com/marigold-dev/training-dapp-1/blob/main/solution/contracts/pokeGame.jsligo
 
 Either you can poke the contract, either you can poke another contract through one and get a feedback.
 Change the storage to do so :
 - if you poke, you just register the contract's owner address and no feedback
-- if you poke and get feedback from another contract, then your register the other contract owner address and its feedback 
+- if you poke and get feedback from another contract, then your register the other contract owner address and its feedback
 
-```jsligo
+Replace storage definition by this one :
+
+```typescript
 type pokeMessage = {
     receiver : address,
     feedback : string
@@ -55,9 +65,9 @@ type storage = {
 };
 ```
 
-Your poke function has changed
+Your poke function has changed to
 
-```jsligo
+```typescript
 const poke = (store : storage) : return_ => {
     let feedbackMessage = {receiver : Tezos.get_self_address() ,feedback: ""};
     return [  list([]) as list<operation>, {...store, 
@@ -68,16 +78,28 @@ const poke = (store : storage) : return_ => {
 `...store` do a copy by value of your object structure
 Here is the explanation of the syntax of [Functional updates](https://ligolang.org/docs/language-basics/maps-records/#functional-updates)
 
+> Note : you cannot do assignment like this `store.pokeTraces=...` in jsligo , use `Functional updates` instead
+
 For more information about [Map](https://ligolang.org/docs/language-basics/maps-records/#maps)
 
 It is not really needed to do a `Record`, but we wanted to introduce [object structure manipulation](https://ligolang.org/docs/language-basics/maps-records#records)  
 
-`Tezos.get_self_address` is a native function that return the currently running contract address. Have a look on [Tezos native functions](https://ligolang.org/docs/reference/current-reference) 
+`Tezos.get_self_address` is a native function that return the currently running contract address. Have a look on [Tezos native functions](https://ligolang.org/docs/reference/current-reference)
+
+Change the storage initialization
+
+```typescript
+#include "pokeGame.jsligo"
+const default_storage = {
+    pokeTraces : Map.empty as map<address, pokeMessage>,
+    feedback : "kiss"
+};
+```
 
 Then compile your contract
 
 ```bash
-ligo compile contract pokeGame.jsligo
+taq compile pokeGame.jsligo
 ```
 
 We will write the pokeAndGetFeedback function later, let pass to unit testing
@@ -93,10 +115,10 @@ sequenceDiagram
   Note right of SM: store user and self contract address with no feedback
 ```
 
-On the smartcontract repository , create a new file 
+Add a new unit test smart contract file `unit_pokeGame.jsligo`  
 
 ```bash
-touch unit_pokeGame.jsligo
+taq create contract unit_pokeGame.jsligo
 ```
 
 
@@ -106,7 +128,7 @@ touch unit_pokeGame.jsligo
 
 Edit the file
 
-```jsligo
+```typescript
 #include "./pokeGame.jsligo"
 
 // reset state
@@ -168,18 +190,21 @@ Explanations :
 Run the test 
 
 ```bash
-ligo run test unit_pokeGame.jsligo 
+taq test unit_pokeGame.jsligo 
 ```
 
-Output should give you intermediary logs and finally the test results 
+Output should give you intermediary logs and finally the test results
+
 ```logs
-"Sender 1 has balance : "
-...
-Everything at the top-level was executed.
-- testSender1Poke exited with value true.
+┌─────────────────────┬───────────────────────────────────────────┐
+│ Contract            │ Test Results                              │
+├─────────────────────┼───────────────────────────────────────────┤
+│ unit_pokeGame.mligo │ Everything at the top-level was executed. │
+│                     │ - testSender1Poke exited with value true. │
+│                     │                                           │
+│                     │ 🎉 All tests passed 🎉                   │
+└─────────────────────┴────────────────────────────────────────────
 ```
-
-
 
 ## Step 3 : do an inter contract call
 
@@ -203,9 +228,9 @@ Then the function to call on the second contract is `GetFeedback: (contract_call
 
 > Very often, the second contract is named `oracle` because genrally its storage is updated by offchain scheduler and other onchain contract are fetching information from it
 
-Edit the file pokeGame.jsligo, starting with the main function
+Edit the file pokeGame.jsligo, starting with the main function and some types to (re)define :
 
-```jsligo
+```typescript
 ...
 
 type returned_feedback = [address, string]; //address that gives feedback and a string message
@@ -238,7 +263,8 @@ Explanations :
 We need to write the missing functions, starting with `getFeedback`
 
 Add this new function (before the main method)
-```jsligo
+
+```typescript
 const getFeedback = ([contract_callback,store] : [contract<returned_feedback>,storage]): return_ => {
     let op : operation = Tezos.transaction(
             [Tezos.get_self_address(),store.feedback], 
@@ -254,7 +280,7 @@ const getFeedback = ([contract_callback,store] : [contract<returned_feedback>,st
 
 Add now, the first part of the function `pokeAndGetFeedback` 
 
-```jsligo
+```typescript
 const pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ => {
     
   //Prepares call to oracle
@@ -280,7 +306,7 @@ const pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ =
 
 Let's write the last missing function `pokeAndGetFeedbackCallback` that will receive the feedback and finally store it
 
-```jsligo
+```typescript
 const pokeAndGetFeedbackCallback = ([feedback,store] : [returned_feedback , storage]) : return_ => {
     let feedbackMessage = {receiver : feedback[0] ,feedback: feedback[1]};
     return [  list([]) as list<operation>, {...store, 
@@ -293,15 +319,16 @@ const pokeAndGetFeedbackCallback = ([feedback,store] : [returned_feedback , stor
 
 
 Just compile the contract. Check if it passes correctly
+
 ```bash 
-ligo compile contract pokeGame.jsligo  
+taq compile pokeGame.jsligo  
 ```
 
 (Optional) Write a unit test for this new function `pokeAndGetFeedback`
 
 ## Step 4 : Use views instead of inter-contract call
 
-As you did on previous step, inter-contract calls can complexify a lot the business logic but not only, think about the cost : https://ligolang.org/docs/tutorials/inter-contract-calls/inter-contract-calls#a-note-on-complexity
+As you did on previous step, inter-contract calls can complexify a lot the business logic but not only, think about the cost : https://ligolang.org/docs/tutorials/inter-contract-calls/inter-contract-calls#
 
 In our case, the oracle is providing a read only storage that can be replaced by a `view` instead of complex and costy callbacks
 
@@ -317,14 +344,14 @@ sequenceDiagram
   Note left of SM: store feedback from P
 ```
 
-Comment all of this :
+:warning: **Comment all of this (with /* */ syntax or // syntax)** :
 - previous functions `pokeAndGetFeedbackCallback` and `getFeedback`
 - `parameter` variant useless declarations
-- in the `match` of `main` function, comment the useless cases
+- in the `match` of `main` function, comment the useless cases `PokeAndGetFeedbackCallback` and `GetFeedback`
 
 Edit function `pokeAndGetFeedback` to do a read view operation instead of a transaction call
 
-```jsligo
+```typescript
 const pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ => {
   //Read the feedback view
   let feedbackOpt : option<string> = Tezos.call_view("feedback", unit, oracleAddress);
@@ -342,19 +369,18 @@ const pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ =
 
 Declare the view at the end of the file. Do not forget the annotation @view in comments
 
-```jsligo
+```typescript
 // @view
 const feedback = ([_, store] : [unit, storage]) : string => { return store.feedback };
 ```
 
 Just compile the contract. Check if it passes correctly
+
 ```bash 
-ligo compile contract pokeGame.jsligo  
+taq compile pokeGame.jsligo  
 ```
 
 (Optional) Write a unit test for the updated function `pokeAndGetFeedback`
-
-
 
 ## Step 5 : Write mutation tests :space_invader: 
 
@@ -369,12 +395,12 @@ The higher the percentage of mutants killed, the more effective your tests are.
 Let's do this, create a file `mutation_pokeGame.jsligo`
 
 ```bash
-touch mutation_pokeGame.jsligo
+taq create contract mutation_pokeGame.jsligo
 ```
 
 Edit the file
 
-```jsligo
+```typescript
 #import "./pokeGame.jsligo" "PokeGame"
 #import "./unit_pokeGame.jsligo" "PokeGameTest"
 
@@ -421,9 +447,9 @@ Let's explain it first
 
 As we need to point to some function from other files, we will have to expose this.
 
-Edit also the file `pokeGame.jsligo`, adding `export` keyword
+Edit also the file `pokeGame.jsligo`, adding `export` keyword on exportable types
 
-```jsligo
+```typescript
 export type pokeMessage = {
 ...
 export type storage = {
@@ -435,9 +461,9 @@ export type parameter =
 export let main = ([action, store] : [parameter, storage]) : return_ => {
 ```
 
-and edit `unit_pokeGame.jsligo` too, this time, we will have to change a bit the code itself to be able to pass the source code to originate as parameter, that way, we saw that the mutation framework is able to inject different versions of it. Move contract origination code block inside the _testPoke function this time.
+and edit `unit_pokeGame.jsligo` too, this time, we will have to change a bit the code itself to be able to pass the source code to originate as parameter, that way, we saw that the mutation framework is able to inject different versions of it. Move contract origination code block inside the `_testPoke` function this time.
 
-```jsligo
+```typescript
 #import "./pokeGame.jsligo" "PokeGame"
 
 export type main_fn = (parameter : PokeGame.parameter, storage : PokeGame.storage) => PokeGame.return_ ;
@@ -487,10 +513,11 @@ export let _testPoke = ([main , s] : [main_fn , address]) : bool => {
 All is ok, let's run it
 
 ```bash
-ligo run test mutation_pokeGame.jsligo
+taq test mutation_pokeGame.jsligo
 ```
 
-output :
+Output :
+
 ```logs
 ...
 "Mutation issue found"
@@ -501,8 +528,15 @@ output :
 
 Replacing by: "feedbackfeedback".
 )
-Everything at the top-level was executed.
-- test_mutation exited with value false.
+
+┌─────────────────────────┬───────────────────────────────────────────┐
+│ Contract                │ Test Results                              │
+├─────────────────────────┼───────────────────────────────────────────┤
+│ mutation_pokeGame.mligo │ Everything at the top-level was executed. │
+│                         │ - test_mutation exited with value false.  │
+│                         │                                           │
+│                         │ Tests failed                              │
+└─────────────────────────┴────────────────────────────────────────────
 ```
 
 :space_invader: :space_invader: :space_invader:  Holy :shit:  , invaders !!! :space_invader: :space_invader: :space_invader:
@@ -514,7 +548,7 @@ The mutation has alterated a part of the code we did not test and we were not co
 As we are lazy today, instead of fixing it, we will see that we can also tell the Library to ignore this.
 Go to your source file pokeGame.jsligo, and annotate the function `pokeAndGetFeedback` with `@no_mutation`
 
-```jsligo
+```typescript
 // @no_mutation
 export const pokeAndGetFeedback
 ```
@@ -522,77 +556,70 @@ export const pokeAndGetFeedback
 Run again the mutation tests
 
 ```bash
-ligo run test mutation_pokeGame.jsligo
+taq test mutation_pokeGame.jsligo
 ```
 
 Output 
 
 ```logs
-"No mutation errors"
-Everything at the top-level was executed.
-- test_mutation exited with value true.
+┌─────────────────────────┬───────────────────────────────────────────┐
+│ Contract                │ Test Results                              │
+├─────────────────────────┼───────────────────────────────────────────┤
+│ mutation_pokeGame.mligo │ Everything at the top-level was executed. │
+│                         │ - test_mutation exited with value false.  │
+│                         │                                           │
+│                         │ 🎉 All tests passed 🎉                   │
+└─────────────────────────┴────────────────────────────────────────────
 ```
 
 We won :sunglasses: :wine_glass: 
-
-
 
 # :construction_worker:  Dapp 
 
 ## Step 1 : Reuse dapp from previous session
 
-https://github.com/marigold-dev/training-dapp-1/tree/main/solution/dapp
+https://github.com/marigold-dev/training-dapp-1/tree/main/solution/app
 
 ## Step 2 : Redeploy new smart contract code
 
-Redeploy a new version of the smart contract (force it if necessary with --force). You can set `feedback` value to any action other than `kiss` :kissing:
+Redeploy a new version of the smart contract. You can set `feedback` value to any action other than `kiss` :kissing: (it will be more fun for tother to discover it)
 
 ```bash
-ligo compile contract ./smartcontract/pokeGame.jsligo --output-file pokeGame.tz --protocol jakarta
-
-ligo compile storage ./smartcontract/pokeGame.jsligo '{pokeTraces : Map.empty as map<address, pokeMessage> , feedback : "kiss"}' --output-file pokeGameStorage.tz --protocol jakarta
-
-tezos-client originate contract mycontract transferring 0 from <ACCOUNT_KEY_NAME> running pokeGame.tz --init "$(cat pokeGameStorage.tz)" --burn-cap 1 --force
+taq compile pokeGame.jsligo 
+taq generate types ./app/src
+taq deploy pokeGame.tz -e "testing"
 ```
 
 ## Step 3 : Adapt the application code
 
-Copy the new contract address `KT1***` to update the file dapp/src/App.tsx
+Add new import
 
-```javascript
-      setContracts((await contractsService.getSimilar({address:"KT1N9tw4L7kjE8boFfmm7GbejS2i2GYnShG9" , includeStorage:true, sort:{desc:"id"}})));
-```
-
-Add new type at beginning of the file
-```javascript
-type pokeMessage = {
-  receiver : string,
-  feedback : string
-};
+```typescript
+import { address } from './type-aliases';
 ```
 
 Add new React variable after `userBalance` definition
 
-```javascript
+```typescript
   const [contractToPoke, setContractToPoke] = useState<string>("");
 ```
 
 then change the poke function to set entrypoint to `pokeAndGetFeedback`
 
-```javascript
+```typescript
  //poke
-  const poke = async (e :  React.FormEvent<HTMLFormElement>, contract : Contract) => {  
-    e.preventDefault(); 
-    let c : WalletContract = await Tezos.wallet.at(""+contract.address);
-    try {
-      const op = await c.methods.pokeAndGetFeedback(contractToPoke).send();
-      await op.confirmation();
-      alert("Tx done");
-    } catch (error : any) {
-      console.log(error);
-      console.table(`Error: ${JSON.stringify(error, null, 2)}`);
-    }
-  };
+ const poke = async (e :  React.FormEvent<HTMLFormElement>, contract : Contract) => {  
+  e.preventDefault(); 
+  let c : PokeGameWalletType = await Tezos.wallet.at(""+contract.address);
+  try {
+    const op = await c.methods.pokeAndGetFeedback(contractToPoke as address).send();
+    await op.confirmation();
+    alert("Tx done");
+  } catch (error : any) {
+    console.log(error);
+    console.table(`Error: ${JSON.stringify(error, null, 2)}`);
+  }
+};
 ```
 
 Finally, change the display of the table
@@ -606,7 +633,8 @@ Finally, change the display of the table
 Relaunch the app
 
 ```bash
-cd dapp
+cd app
+yarn install
 yarn run start
 ```
 
@@ -616,6 +644,8 @@ On the listed contract, choose your line and input the address of the contract y
 
 This time, the logged user will receive a feedback from a targeted contract (as input of the form) via any listed contract (the first column of the table).
 
+Refresh manually clicking on `Fetch contracts` button
+
 :point_up: Poke other developer's contract to discover their contract hidden feedback when you poke them
 
 
@@ -623,6 +653,6 @@ This time, the logged user will receive a feedback from a targeted contract (as 
 
 Now, you are able to call other contracts, use views and test you smart contract before deploying it
 
-On next training, you will learn how to upgrade a Smart contract, store/execute lambda function and use tickets
+On next training, you will learn how to use tickets
 
 [:arrow_right: NEXT](https://github.com/marigold-dev/training-dapp-3)

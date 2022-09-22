@@ -8,11 +8,9 @@ export type storage = {
     feedback : string
 };
 
-export type return_ = [list<operation>, storage];
+//type returned_feedback = [address, string]; //address that gives feedback and a string message
 
-type returned_feedback = [address, string]; //address that gives feedback and a string message
-
-type oracle_param = contract<returned_feedback>;
+//type oracle_param = contract<returned_feedback>;
 
 export type parameter =
 | ["Poke"]
@@ -20,6 +18,8 @@ export type parameter =
 //| ["PokeAndGetFeedbackCallback", returned_feedback]
 //| ["GetFeedback",oracle_param]
 ;
+
+export type return_ = [list<operation>, storage];
 
 const poke = (store : storage) : return_ => {
     let feedbackMessage = {receiver : Tezos.get_self_address() ,feedback: ""};
@@ -59,12 +59,10 @@ const pokeAndGetFeedbackCallback = ([feedback,store] : [returned_feedback , stor
 };
 */
 
-/* Main access point that dispatches to the entrypoints according to
-the smart contract parameter. */
 export const main = ([action, store] : [parameter, storage]) : return_ => {
     return match (action, {
         Poke: () => poke(store),
-        PokeAndGetFeedback: (other : address) => pokeAndGetFeedback(other,store)
+        PokeAndGetFeedback: (other : address) => pokeAndGetFeedback(other,store),
       //  PokeAndGetFeedbackCallback: (feedback : returned_feedback) => pokeAndGetFeedbackCallback(feedback,store),
       //  GetFeedback: (contract_callback: oracle_param)=> getFeedback(contract_callback,store)
     } 
