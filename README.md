@@ -149,7 +149,7 @@ const _ = Test.log("contract deployed with values : ");
 const _ = Test.log(contr);
 
 //functions
-export const _testPoke = (s : address, expectedResult : bool) : unit => {
+export const _testPoke = (s : address) : unit => {
     Test.set_source(s);
 
     let status = Test.transfer_to_contract(contr, Poke() as parameter, 0 as tez);
@@ -161,7 +161,7 @@ export const _testPoke = (s : address, expectedResult : bool) : unit => {
     //check poke is registered
     match(Map.find_opt (s, store.pokeTraces), {
         Some: (pokeMessage: pokeMessage) => { assert_with_error(pokeMessage.feedback == "","feedback "+pokeMessage.feedback+" is not equal to expected "+"(empty)"); assert_with_error(pokeMessage.receiver == contrAddress,"receiver is not equal");} ,
-        None: () => assert_with_error(expectedResult == false,"don't find traces")
+        None: () => assert_with_error(false,"don't find traces")
        });
       
   };
@@ -169,7 +169,7 @@ export const _testPoke = (s : address, expectedResult : bool) : unit => {
  
   //********** TESTS *************/
  
-  const testSender1Poke = _testPoke(sender1,true);
+  const testSender1Poke = _testPoke(sender1);
 ```
 
 Explanations : 
@@ -178,7 +178,7 @@ Explanations :
 - `Test.nth_bootstrap_account` this return the nth account from the environment
 - `Test.originate(MAIN_FUNCTION, INIT_STORAGE, INIT_BALANCE)` will originate a smart contract into the environment
 - `Test.to_contract(taddr)` and `Tezos.address(contr)` are util functions to convert typed addresses, contract and contract addresses
-- `let _testPoke = (s : address) : bool => {...}` declaring function starting with "**_**" will not be part of the test run results. Use this to factorize tests changing only the parameters of the function for different scenarios
+- `let _testPoke = (s : address) : unit => {...}` declaring function starting with "**_**" will not be part of the test run results. Use this to factorize tests changing only the parameters of the function for different scenarios
 - `Test.set_source` do not forget to set this value for the transaction signer
 - `Test.transfer_to_contract(CONTRACT, PARAMS, TEZ_COST)` This is how we call a transaction
 - `Test.get_storage` this is how to retrieve the contract's storage
@@ -411,34 +411,27 @@ Edit the file
 #import "./unit_pokeGame.jsligo" "PokeGameTest"
 
 // reset state
-let _ = Test.reset_state ( 2 as nat, list([]) as list <tez> );
-let faucet = Test.nth_bootstrap_account(0);
-let sender1 : address = Test.nth_bootstrap_account(1);
-let _ = Test.log("Sender 1 has balance : ");
-let _ = Test.log(Test.get_balance(sender1));
+const _ = Test.reset_state ( 2 as nat, list([]) as list <tez> );
+const faucet = Test.nth_bootstrap_account(0);
+const sender1 : address = Test.nth_bootstrap_account(1);
+const _ = Test.log("Sender 1 has balance : ");
+const _ = Test.log(Test.get_balance(sender1));
 
-let _ = Test.set_baker(faucet);
-let _ = Test.set_source(faucet);
+const _ = Test.set_baker(faucet);
+const _ = Test.set_source(faucet);
 
 
-const _tests = (main : PokeGameTest.main_fn) : bool => {
-  return PokeGameTest._testPoke([main,sender1]);
+const _tests = (main : PokeGameTest.main_fn) : unit => {
+  return PokeGameTest._testPoke(main,sender1);
 };
 
-const _test_mutation = () : bool => {
-
-  let log = (mutations : list<[bool,mutation]>) : bool => {
-    if(List.size(mutations) == (1 as nat)) {Test.log("Mutation issue found"); Test.log(Option.unopt(List.head_opt(mutations))); return false;}
-    else return log(Option.unopt(List.tail_opt(mutations))); 
-  };
-
-  return match(Test.mutation_test_all(PokeGame.main,_tests) , list([
-  ([] : list<[bool,mutation]>) => {Test.log("No mutation errors"); return true;},
-  ([head,...tail] : list<[bool,mutation]>) => {
-    if(List.size(tail) == (0 as nat)) { Test.log(head); return false;}
-    else return log(tail); 
-    }
+const _test_mutation = () : unit => {
+  const mutationErrorList = Test.mutation_test_all(PokeGame.main,_tests);
+  match(mutationErrorList,list([
+    ([] : list<[unit,mutation]>) => unit,
+    ([head,..._tail] : list<[unit,mutation]>) => {Test.log(head);assert_with_error(false,Test.to_string(head[1]))}
   ]));
+  
 }
 
 const test_mutation = _test_mutation(); 
@@ -446,8 +439,8 @@ const test_mutation = _test_mutation();
 
 Let's explain it first
 - `#import <SRC_FILE> <NAMESPACE>` : import your source code that will be mutated and your unit tests. For more information [module doc](https://ligolang.org/docs/language-basics/modules)
-- `let _tests = (main : PokeGameTest.main_fn) : bool` : you need to provide the test suite that will be run by the framework. As we don't have a main function, we just wrap it into a global function 
-- `let _test_mutation = () : bool =>` : this is the definition of the mutations tests
+- `let _tests = (main : PokeGameTest.main_fn) : unit` : you need to provide the test suite that will be run by the framework. As we don't have a main function, we just wrap it into a global function 
+- `let _test_mutation = () : unit =>` : this is the definition of the mutations tests
 - `Test.mutation_test_all(PokeGame.main,_tests)` : This will take the first argument as the source code to mutate and the second argument as unit test suite funtion to run over. It returns a list of mutations that succeed (if size > 0 then bad test coverage) or empty list (good, even mutants did not harm your code)
 - `let test_mutation = _test_mutation();` : as you see it works the same as ligo unit tests and will be run the same way
 
@@ -486,7 +479,7 @@ const _ = Test.set_baker(faucet);
 const _ = Test.set_source(faucet);
 
 //functions
-export const _testPoke = (main : main_fn , s: address, expectedResult : bool) : unit => {
+export const _testPoke = (main : main_fn , s: address) : unit => {
 
     //contract origination
     const [taddr, _, _] = Test.originate(main, {pokeTraces : Map.empty as map<address, PokeGame.pokeMessage> , feedback : "kiss"}, 0 as tez);
@@ -506,7 +499,7 @@ export const _testPoke = (main : main_fn , s: address, expectedResult : bool) : 
     //check poke is registered
     match(Map.find_opt (s, store.pokeTraces), {
         Some: (pokeMessage: pokeMessage) => { assert_with_error(pokeMessage.feedback == "","feedback "+pokeMessage.feedback+" is not equal to expected "+"(empty)"); assert_with_error(pokeMessage.receiver == contrAddress,"receiver is not equal");} ,
-        None: () => assert_with_error(expectedResult == false,"don't find traces")
+        None: () => assert_with_error(false,"don't find traces")
        });
       
   };
@@ -514,7 +507,7 @@ export const _testPoke = (main : main_fn , s: address, expectedResult : bool) : 
  
   //********** TESTS *************/
  
-  const testSender1Poke = _testPoke(PokeGame.main,sender1,true);
+  const testSender1Poke = _testPoke(PokeGame.main,sender1);
 ```
 
 All is ok, let's run it
@@ -526,24 +519,16 @@ taq test mutation_pokeGame.jsligo
 Output :
 
 ```logs
-...
-"Mutation issue found"
-(true , Mutation at: File "./pokeGame.jsligo", line 34, characters 53-63:
- 33 |   //Read the feedback view
- 34 |   let feedbackOpt : option<string> = Tezos.call_view("feedback", unit, oracleAddress);
- 35 | 
+=== For mutation_pokeGame.jsligo ===
 
-Replacing by: "feedbackfeedback".
-)
+An uncaught error occured:
+Failwith: "Mutation at: File \"contracts/./pokeGame.jsligo\", line 49, characters 26-77:\n\nReplacing by: \"cannot find view feedback on given oracle address\".\n"
 
-┌─────────────────────────┬───────────────────────────────────────────┐
-│ Contract                │ Test Results                              │
-├─────────────────────────┼───────────────────────────────────────────┤
-│ mutation_pokeGame.mligo │ Everything at the top-level was executed. │
-│                         │ - test_mutation exited with value false.  │
-│                         │                                           │
-│                         │ Tests failed                              │
-└─────────────────────────┴────────────────────────────────────────────
+┌──────────────────────────┬──────────────────────┐
+│ Contract                 │ Test Results         │
+├──────────────────────────┼──────────────────────┤
+│ mutation_pokeGame.jsligo │ Some tests failed :( │
+└──────────────────────────┴──────────────────────┘
 ```
 
 :space_invader: :space_invader: :space_invader:  Holy :shit:  , invaders !!! :space_invader: :space_invader: :space_invader:
@@ -569,14 +554,22 @@ taq test mutation_pokeGame.jsligo
 Output 
 
 ```logs
-┌─────────────────────────┬───────────────────────────────────────────┐
-│ Contract                │ Test Results                              │
-├─────────────────────────┼───────────────────────────────────────────┤
-│ mutation_pokeGame.mligo │ Everything at the top-level was executed. │
-│                         │ - test_mutation exited with value false.  │
-│                         │                                           │
-│                         │ 🎉 All tests passed 🎉                   │
-└─────────────────────────┴────────────────────────────────────────────
+┌──────────────────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ Contract                 │ Test Results                                                                                                                                   │
+├──────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ mutation_pokeGame.jsligo │ "Sender 1 has balance : "                                                                                                                      │
+│                          │ 3800000000000mutez                                                                                                                             │
+│                          │ "contract deployed with values : "                                                                                                             │
+│                          │ KT1FdoDUxuq69b3Yi4DHiZrAp53qAv9cuC2p(None)                                                                                                     │
+│                          │ Success (2154n)                                                                                                                                │
+│                          │ {feedback = "kiss" ; pokeTraces = [tz1TDZG4vFoA2xutZMYauUnS4HVucnAGQSpZ -> {feedback = "" ; receiver = KT1FdoDUxuq69b3Yi4DHiZrAp53qAv9cuC2p}]} │
+│                          │ "Sender 1 has balance : "                                                                                                                      │
+│                          │ 3800000000000mutez                                                                                                                             │
+│                          │ Everything at the top-level was executed.                                                                                                      │
+│                          │ - test_mutation exited with value ().                                                                                                          │
+│                          │                                                                                                                                                │
+│                          │ 🎉 All tests passed 🎉                                                                                                                         │
+└──────────────────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 We won :sunglasses: :wine_glass: 

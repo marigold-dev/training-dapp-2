@@ -64,39 +64,6 @@
                 }
             ]
         },
-        "@taqueria/plugin-ligo.test.1664377707736": {
-            "task": "test",
-            "plugin": "@taqueria/plugin-ligo",
-            "time": 1664377707736,
-            "output": [
-                {
-                    "contract": "mutation_pokeGame.jsligo",
-                    "testResults": "Some tests failed :("
-                }
-            ]
-        },
-        "@taqueria/plugin-ligo.test.1664377717146": {
-            "task": "test",
-            "plugin": "@taqueria/plugin-ligo",
-            "time": 1664377717146,
-            "output": [
-                {
-                    "contract": "mutation_pokeGame.jsligo",
-                    "testResults": "Some tests failed :("
-                }
-            ]
-        },
-        "@taqueria/plugin-ligo.test.1664378011898": {
-            "task": "test",
-            "plugin": "@taqueria/plugin-ligo",
-            "time": 1664378011898,
-            "output": [
-                {
-                    "contract": "mutation_pokeGame.jsligo",
-                    "testResults": "Some tests failed :("
-                }
-            ]
-        },
         "@taqueria/plugin-ligo.test.1664378035629": {
             "task": "test",
             "plugin": "@taqueria/plugin-ligo",
@@ -116,6 +83,39 @@
                 {
                     "contract": "mutation_pokeGame.jsligo",
                     "testResults": "Some tests failed :("
+                }
+            ]
+        },
+        "@taqueria/plugin-ligo.test.1664379012585": {
+            "task": "test",
+            "plugin": "@taqueria/plugin-ligo",
+            "time": 1664379012585,
+            "output": [
+                {
+                    "contract": "mutation_pokeGame.jsligo",
+                    "testResults": "\"Sender 1 has balance : \"\n3800000000000mutez\n\"contract deployed with values : \"\nKT1FdoDUxuq69b3Yi4DHiZrAp53qAv9cuC2p(None)\nSuccess (2154n)\n{feedback = \"kiss\" ; pokeTraces = [tz1TDZG4vFoA2xutZMYauUnS4HVucnAGQSpZ -> {feedback = \"\" ; receiver = KT1FdoDUxuq69b3Yi4DHiZrAp53qAv9cuC2p}]}\n\"Sender 1 has balance : \"\n3800000000000mutez\nEverything at the top-level was executed.\n- test_mutation exited with value ().\n\n🎉 All tests passed 🎉"
+                }
+            ]
+        },
+        "@taqueria/plugin-ligo.test.1664379027227": {
+            "task": "test",
+            "plugin": "@taqueria/plugin-ligo",
+            "time": 1664379027227,
+            "output": [
+                {
+                    "contract": "mutation_pokeGame.jsligo",
+                    "testResults": "Some tests failed :("
+                }
+            ]
+        },
+        "@taqueria/plugin-ligo.test.1664379066496": {
+            "task": "test",
+            "plugin": "@taqueria/plugin-ligo",
+            "time": 1664379066496,
+            "output": [
+                {
+                    "contract": "mutation_pokeGame.jsligo",
+                    "testResults": "\"Sender 1 has balance : \"\n3800000000000mutez\n\"contract deployed with values : \"\nKT1FdoDUxuq69b3Yi4DHiZrAp53qAv9cuC2p(None)\nSuccess (2154n)\n{feedback = \"kiss\" ; pokeTraces = [tz1TDZG4vFoA2xutZMYauUnS4HVucnAGQSpZ -> {feedback = \"\" ; receiver = KT1FdoDUxuq69b3Yi4DHiZrAp53qAv9cuC2p}]}\n\"Sender 1 has balance : \"\n3800000000000mutez\nEverything at the top-level was executed.\n- test_mutation exited with value ().\n\n🎉 All tests passed 🎉"
                 }
             ]
         }
