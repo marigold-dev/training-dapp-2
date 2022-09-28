@@ -149,10 +149,10 @@ const _ = Test.log("contract deployed with values : ");
 const _ = Test.log(contr);
 
 //functions
-const _testPoke = (s : address) : bool => {
+export const _testPoke = (s : address, expectedResult : bool) : unit => {
     Test.set_source(s);
 
-    let status = Test.transfer_to_contract(contr, Poke() as PokeGame.parameter, 0 as tez);
+    let status = Test.transfer_to_contract(contr, Poke() as parameter, 0 as tez);
     Test.log(status);
     
     let store : storage = Test.get_storage(taddr);
@@ -160,8 +160,8 @@ const _testPoke = (s : address) : bool => {
 
     //check poke is registered
     match(Map.find_opt (s, store.pokeTraces), {
-        Some: (pokeMessage: pokeMessage) => { assert_with_error(pokeMessage.feedback == "","feedback "+pokeMessage.feedback+" is not equal to expected "+"(empty)"); assert_with_error(pokeMessage.receiver == contrAddress,"receiver is not equal"); return true; } ,
-        None: () => false
+        Some: (pokeMessage: pokeMessage) => { assert_with_error(pokeMessage.feedback == "","feedback "+pokeMessage.feedback+" is not equal to expected "+"(empty)"); assert_with_error(pokeMessage.receiver == contrAddress,"receiver is not equal");} ,
+        None: () => assert_with_error(expectedResult == false,"don't find traces")
        });
       
   };
@@ -169,7 +169,7 @@ const _testPoke = (s : address) : bool => {
  
   //********** TESTS *************/
  
-  const testSender1Poke = _testPoke(sender1);
+  const testSender1Poke = _testPoke(sender1,true);
 ```
 
 Explanations : 
@@ -196,14 +196,20 @@ taq test unit_pokeGame.jsligo
 Output should give you intermediary logs and finally the test results
 
 ```logs
-┌─────────────────────┬───────────────────────────────────────────┐
-│ Contract            │ Test Results                              │
-├─────────────────────┼───────────────────────────────────────────┤
-│ unit_pokeGame.mligo │ Everything at the top-level was executed. │
-│                     │ - testSender1Poke exited with value true. │
-│                     │                                           │
-│                     │ 🎉 All tests passed 🎉                   │
-└─────────────────────┴────────────────────────────────────────────
+┌──────────────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ Contract             │ Test Results                                                                                                                                   │
+├──────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ unit_pokeGame.jsligo │ "Sender 1 has balance : "                                                                                                                      │
+│                      │ 3800000000000mutez                                                                                                                             │
+│                      │ "contract deployed with values : "                                                                                                             │
+│                      │ KT1CqP6gKAKQoYEQwtN6FPjJnFojA9Tff6dm(None)                                                                                                     │
+│                      │ Success (2154n)                                                                                                                                │
+│                      │ {feedback = "kiss" ; pokeTraces = [tz1TDZG4vFoA2xutZMYauUnS4HVucnAGQSpZ -> {feedback = "" ; receiver = KT1CqP6gKAKQoYEQwtN6FPjJnFojA9Tff6dm}]} │
+│                      │ Everything at the top-level was executed.                                                                                                      │
+│                      │ - testSender1Poke exited with value ().                                                                                                        │
+│                      │                                                                                                                                                │
+│                      │ 🎉 All tests passed 🎉                                                                                                                         │
+└──────────────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## Step 3 : do an inter contract call
@@ -468,38 +474,39 @@ and edit `unit_pokeGame.jsligo` too, this time, we will have to change a bit the
 
 export type main_fn = (parameter : PokeGame.parameter, storage : PokeGame.storage) => PokeGame.return_ ;
 
-// reset state
-let _ = Test.reset_state ( 2 as nat, list([]) as list <tez> );
-let faucet = Test.nth_bootstrap_account(0);
-let sender1 : address = Test.nth_bootstrap_account(1);
-let _ = Test.log("Sender 1 has balance : ");
-let _ = Test.log(Test.get_balance(sender1));
 
-let _ = Test.set_baker(faucet);
-let _ = Test.set_source(faucet);
+// reset state
+const _ = Test.reset_state ( 2 as nat, list([]) as list <tez> );
+const faucet = Test.nth_bootstrap_account(0);
+const sender1 : address = Test.nth_bootstrap_account(1);
+const _ = Test.log("Sender 1 has balance : ");
+const _ = Test.log(Test.get_balance(sender1));
+
+const _ = Test.set_baker(faucet);
+const _ = Test.set_source(faucet);
 
 //functions
-export let _testPoke = ([main , s] : [main_fn , address]) : bool => {
+export const _testPoke = (main : main_fn , s: address, expectedResult : bool) : unit => {
 
     //contract origination
-    let [taddr, _, _] = Test.originate(main, {pokeTraces : Map.empty as map<address, PokeGame.pokeMessage> , feedback : "kiss"}, 0 as tez);
-    let contr = Test.to_contract(taddr);
-    let contrAddress = Tezos.address(contr);
-    let _ = Test.log("contract deployed with values : ");
-    let _ = Test.log(contr);
+    const [taddr, _, _] = Test.originate(main, {pokeTraces : Map.empty as map<address, PokeGame.pokeMessage> , feedback : "kiss"}, 0 as tez);
+    const contr = Test.to_contract(taddr);
+    const contrAddress = Tezos.address(contr);
+    const _ = Test.log("contract deployed with values : ");
+    const _ = Test.log(contr);
 
     Test.set_source(s);
 
-    let status = Test.transfer_to_contract(contr, Poke() as PokeGame.parameter, 0 as tez);
+    const status = Test.transfer_to_contract(contr, Poke() as PokeGame.parameter, 0 as tez);
     Test.log(status);
     
-    let store : PokeGame.storage = Test.get_storage(taddr);
+    const store : PokeGame.storage = Test.get_storage(taddr);
     Test.log(store);
 
     //check poke is registered
     match(Map.find_opt (s, store.pokeTraces), {
-        Some: (pokeMessage: PokeGame.pokeMessage) => { assert_with_error(pokeMessage.feedback == "","feedback "+pokeMessage.feedback+" is not equal to expected "+"(empty)"); assert_with_error(pokeMessage.receiver == contrAddress,"receiver is not equal"); return true; } ,
-        None: () => false
+        Some: (pokeMessage: pokeMessage) => { assert_with_error(pokeMessage.feedback == "","feedback "+pokeMessage.feedback+" is not equal to expected "+"(empty)"); assert_with_error(pokeMessage.receiver == contrAddress,"receiver is not equal");} ,
+        None: () => assert_with_error(expectedResult == false,"don't find traces")
        });
       
   };
@@ -507,7 +514,7 @@ export let _testPoke = ([main , s] : [main_fn , address]) : bool => {
  
   //********** TESTS *************/
  
-  const testSender1Poke = _testPoke([PokeGame.main,sender1]);
+  const testSender1Poke = _testPoke(PokeGame.main,sender1,true);
 ```
 
 All is ok, let's run it

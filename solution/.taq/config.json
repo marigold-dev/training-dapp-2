@@ -1,23 +1,29 @@
 {
     "language": "en",
+    "plugins": [
+        {
+            "name": "@taqueria/plugin-flextesa",
+            "type": "npm"
+        },
+        {
+            "name": "@taqueria/plugin-contract-types",
+            "type": "npm"
+        },
+        {
+            "name": "@taqueria/plugin-ligo",
+            "type": "npm"
+        },
+        {
+            "name": "@taqueria/plugin-taquito",
+            "type": "npm"
+        }
+    ],
     "contractsDir": "contracts",
     "artifactsDir": "artifacts",
     "contracts": {
         "pokeGame.jsligo": {
             "sourceFile": "pokeGame.jsligo",
-            "hash": "5737454d4dd7c3947452a5d2003c30353b62f19a6d73f98ad830a187574b3751"
-        },
-        "pokeGame.storages.jsligo": {
-            "sourceFile": "pokeGame.storages.jsligo",
-            "hash": "5737454d4dd7c3947452a5d2003c30353b62f19a6d73f98ad830a187574b3751"
-        },
-        "unit_pokeGame.jsligo": {
-            "sourceFile": "unit_pokeGame.jsligo",
-            "hash": "5737454d4dd7c3947452a5d2003c30353b62f19a6d73f98ad830a187574b3751"
-        },
-        "mutation_pokeGame.jsligo": {
-            "sourceFile": "mutation_pokeGame.jsligo",
-            "hash": "5737454d4dd7c3947452a5d2003c30353b62f19a6d73f98ad830a187574b3751"
+            "hash": "42d5be89fd800f541d7aa807dcf1b00b9843fe5c68860c39908bb95667353600"
         }
     },
     "network": {
@@ -26,7 +32,6 @@
             "rpcUrl": "https://ghostnet.tezos.marigold.dev",
             "protocol": "PtKathmankSpLLDALzWw7CGD2j2MtyveTwboEYokqUCP4a1LxMg",
             "faucet": {
-                "pkh": "tz1Qjvu8xaRgTjQmHBBDHaM1HGomCTYBgLZJ",
                 "mnemonic": [
                     "away",
                     "virus",
@@ -47,7 +52,8 @@
                 "email": "mpyuqqza.jqszvrsy@teztnets.xyz",
                 "password": "9OvRmgifTP",
                 "amount": "17415095578",
-                "activation_code": "8e54d45a59d21089fc60c6d4e94ecf4ecc44c417"
+                "activation_code": "8e54d45a59d21089fc60c6d4e94ecf4ecc44c417",
+                "pkh": "tz1Qjvu8xaRgTjQmHBBDHaM1HGomCTYBgLZJ"
             }
         }
     },
@@ -119,26 +125,5 @@
         "john": "3_000_000_000",
         "jane": "3_000_000_000",
         "joe": "3_000_000_000"
-    },
-    "plugins": [
-        {
-            "name": "@taqueria/plugin-ligo",
-            "type": "npm"
-        },
-        {
-            "name": "@taqueria/plugin-flextesa",
-            "type": "npm"
-        },
-        {
-            "name": "@taqueria/plugin-taquito",
-            "type": "npm"
-        },
-        {
-            "name": "@taqueria/plugin-contract-types",
-            "type": "npm"
-        }
-    ],
-    "projectDir": "/home/zamrokk/training-dapp-2/solution",
-    "configFile": "/home/zamrokk/training-dapp-2/solution/.taq/config.json",
-    "hash": "9c3c612f2b1979486d5316d9c534884683a0f1391cda9c4e49120f7c7246fca5"
+    }
 }
