@@ -64,10 +64,10 @@
                 }
             ]
         },
-        "@taqueria/plugin-ligo.test.1664373935361": {
+        "@taqueria/plugin-ligo.test.1664377707736": {
             "task": "test",
             "plugin": "@taqueria/plugin-ligo",
-            "time": 1664373935361,
+            "time": 1664377707736,
             "output": [
                 {
                     "contract": "mutation_pokeGame.jsligo",
@@ -75,10 +75,32 @@
                 }
             ]
         },
-        "@taqueria/plugin-ligo.test.1664373962281": {
+        "@taqueria/plugin-ligo.test.1664377717146": {
             "task": "test",
             "plugin": "@taqueria/plugin-ligo",
-            "time": 1664373962281,
+            "time": 1664377717146,
+            "output": [
+                {
+                    "contract": "mutation_pokeGame.jsligo",
+                    "testResults": "Some tests failed :("
+                }
+            ]
+        },
+        "@taqueria/plugin-ligo.test.1664378011898": {
+            "task": "test",
+            "plugin": "@taqueria/plugin-ligo",
+            "time": 1664378011898,
+            "output": [
+                {
+                    "contract": "mutation_pokeGame.jsligo",
+                    "testResults": "Some tests failed :("
+                }
+            ]
+        },
+        "@taqueria/plugin-ligo.test.1664378035629": {
+            "task": "test",
+            "plugin": "@taqueria/plugin-ligo",
+            "time": 1664378035629,
             "output": [
                 {
                     "contract": "mutation_pokeGame.jsligo",
@@ -86,32 +108,10 @@
                 }
             ]
         },
-        "@taqueria/plugin-ligo.test.1664373975422": {
+        "@taqueria/plugin-ligo.test.1664378072368": {
             "task": "test",
             "plugin": "@taqueria/plugin-ligo",
-            "time": 1664373975422,
-            "output": [
-                {
-                    "contract": "mutation_pokeGame.jsligo",
-                    "testResults": "Some tests failed :("
-                }
-            ]
-        },
-        "@taqueria/plugin-ligo.test.1664374005961": {
-            "task": "test",
-            "plugin": "@taqueria/plugin-ligo",
-            "time": 1664374005961,
-            "output": [
-                {
-                    "contract": "mutation_pokeGame.jsligo",
-                    "testResults": "Some tests failed :("
-                }
-            ]
-        },
-        "@taqueria/plugin-ligo.test.1664374028512": {
-            "task": "test",
-            "plugin": "@taqueria/plugin-ligo",
-            "time": 1664374028512,
+            "time": 1664378072368,
             "output": [
                 {
                     "contract": "mutation_pokeGame.jsligo",
