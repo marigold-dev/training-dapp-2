@@ -21,7 +21,7 @@ export type parameter =
 
 export type return_ = [list<operation>, storage];
 
-const poke = (store : storage) : return_ => {
+export const poke = (store : storage) : return_ => {
     let feedbackMessage = {receiver : Tezos.get_self_address() ,feedback: ""};
     return [  list([]) as list<operation>, {...store, 
         pokeTraces : Map.add(Tezos.get_source(), feedbackMessage, store.pokeTraces) }]; 
@@ -34,7 +34,8 @@ const getFeedback = ([contract_callback,store] : [contract<returned_feedback>,st
             (0 as mutez),
             contract_callback);   
     return [list([op]) ,store];
-};*/
+};
+*/
 
 // @no_mutation
 const pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ => {
@@ -63,8 +64,8 @@ export const main = ([action, store] : [parameter, storage]) : return_ => {
     return match (action, {
         Poke: () => poke(store),
         PokeAndGetFeedback: (other : address) => pokeAndGetFeedback(other,store),
-      //  PokeAndGetFeedbackCallback: (feedback : returned_feedback) => pokeAndGetFeedbackCallback(feedback,store),
-      //  GetFeedback: (contract_callback: oracle_param)=> getFeedback(contract_callback,store)
+ //       PokeAndGetFeedbackCallback: (feedback : returned_feedback) => pokeAndGetFeedbackCallback(feedback,store),
+ //       GetFeedback: (contract_callback: oracle_param)=> getFeedback(contract_callback,store)
     } 
     )
 };

@@ -9,7 +9,7 @@ Training dapp n°2
 
 # :point_up:  Poke game (enhanced)
 
-Previouly, you learned how to create your first dapp.
+Previously, you learned how to create your first dapp.
 In this second session, you will enhance your skills on :
 - inter-contract calls
 - views
@@ -457,7 +457,7 @@ export type return_ = [list<operation>, storage];
 ...
 export type parameter =
 ...
-export let main = ([action, store] : [parameter, storage]) : return_ => {
+export const main = ([action, store] : [parameter, storage]) : return_ => {
 ```
 
 and edit `unit_pokeGame.jsligo` too, this time, we will have to change a bit the code itself to be able to pass the source code to originate as parameter, that way, we saw that the mutation framework is able to inject different versions of it. Move contract origination code block inside the `_testPoke` function this time.
@@ -542,7 +542,7 @@ Go to your source file pokeGame.jsligo, and annotate the function `pokeAndGetFee
 
 ```typescript
 // @no_mutation
-export const pokeAndGetFeedback
+const pokeAndGetFeedback
 ```
 
 Run again the mutation tests
@@ -626,7 +626,7 @@ Finally, change the display of the table
 
 ```html
 <table><thead><tr><th>address</th><th>trace "contract - feedback - user"</th><th>action</th></tr></thead><tbody>
-    {contracts.map((contract) => <tr><td style={{borderStyle: "dotted"}}>{contract.address}</td><td style={{borderStyle: "dotted"}}>{(contract.storage !== null && contract.storage.pokeTraces !== null && Object.entries(contract.storage.pokeTraces).length > 0)?Object.keys(contract.storage.pokeTraces).map((k : string)=>contract.storage.pokeTraces[k].receiver+" "+contract.storage.pokeTraces[k].feedback+" "+k+","):""}</td><td style={{borderStyle: "dotted"}}><form onSubmit={(e) =>poke(e,contract)}><input type="text" onChange={e=>setContractToPoke(e.currentTarget.value)} placeholder='enter contract address here' /><button  type='submit'>Poke</button></form></td></tr>)}
+    {contracts.map((contract) => <tr><td style={{borderStyle: "dotted"}}>{contract.address}</td><td style={{borderStyle: "dotted"}}>{(contract.storage !== null && contract.storage.pokeTraces !== null && Object.entries(contract.storage.pokeTraces).length > 0)?Object.keys(contract.storage.pokeTraces).map((k : string)=>contract.storage.pokeTraces[k].receiver+" "+contract.storage.pokeTraces[k].feedback+" "+k+", "):""}</td><td style={{borderStyle: "dotted"}}><form onSubmit={(e) =>poke(e,contract)}><input type="text" onChange={e=>setContractToPoke(e.currentTarget.value)} placeholder='enter contract address here' /><button  type='submit'>Poke</button></form></td></tr>)}
     </tbody></table>
 ```
 
