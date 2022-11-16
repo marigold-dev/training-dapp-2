@@ -27,7 +27,7 @@ export const _testPoke = (main : main_fn , s: address) : unit => {
 
     const status = Test.transfer_to_contract(contr, Poke() as PokeGame.parameter, 0 as tez);
     Test.log(status);
-    
+
     const store : PokeGame.storage = Test.get_storage(taddr);
     Test.log(store);
 
@@ -36,10 +36,10 @@ export const _testPoke = (main : main_fn , s: address) : unit => {
         Some: (pokeMessage: pokeMessage) => { assert_with_error(pokeMessage.feedback == "","feedback "+pokeMessage.feedback+" is not equal to expected "+"(empty)"); assert_with_error(pokeMessage.receiver == contrAddress,"receiver is not equal");} ,
         None: () => assert_with_error(false,"don't find traces")
        });
-      
+
   };
-  
- 
+
+
   //********** TESTS *************/
- 
+
   const testSender1Poke = _testPoke(PokeGame.main,sender1);

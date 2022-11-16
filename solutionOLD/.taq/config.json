@@ -1,0 +1,96 @@
+{
+    "language": "en",
+    "contractsDir": "contracts",
+    "artifactsDir": "artifacts",
+    "contracts": {
+        "pokeGame.jsligo": {
+            "sourceFile": "pokeGame.jsligo",
+            "hash": "5737454d4dd7c3947452a5d2003c30353b62f19a6d73f98ad830a187574b3751"
+        },
+        "pokeGame.storages.jsligo": {
+            "sourceFile": "pokeGame.storages.jsligo",
+            "hash": "5737454d4dd7c3947452a5d2003c30353b62f19a6d73f98ad830a187574b3751"
+        },
+        "pokeGame.parameters.jsligo": {
+            "sourceFile": "pokeGame.parameters.jsligo",
+            "hash": "5737454d4dd7c3947452a5d2003c30353b62f19a6d73f98ad830a187574b3751"
+        },
+        "unit_pokeGame.jsligo": {
+            "sourceFile": "unit_pokeGame.jsligo",
+            "hash": "5737454d4dd7c3947452a5d2003c30353b62f19a6d73f98ad830a187574b3751"
+        },
+        "mutation_pokeGame.jsligo": {
+            "sourceFile": "mutation_pokeGame.jsligo",
+            "hash": "5737454d4dd7c3947452a5d2003c30353b62f19a6d73f98ad830a187574b3751"
+        }
+    },
+    "network": {
+        "ghostnet": {
+            "label": "ghostnet",
+            "rpcUrl": "https://ghostnet.tezos.marigold.dev",
+            "protocol": "PtKathmankSpLLDALzWw7CGD2j2MtyveTwboEYokqUCP4a1LxMg",
+            "accounts": {
+                "taqRootAccount": {
+                    "publicKey": "p2pk64avNy7UBRygrN8EptouD4EdFHgJruferj9WUbR7Ub6uUXjqZJu",
+                    "publicKeyHash": "tz3fcNNiZoPXDpyCoaZ5Tm7RUzBGbFVQzAQ2",
+                    "privateKey": "p2sk2utuKVeBGprzqAaUJZfv2XHWBeKMNEtsnb1ppKmJhaqAhCeGLh"
+                }
+            }
+        }
+    },
+    "sandbox": {
+        "local": {
+            "label": "Local Tezos Sandbox",
+            "rpcUrl": "http://localhost:20000",
+            "protocol": "PtKathmankSpLLDALzWw7CGD2j2MtyveTwboEYokqUCP4a1LxMg"
+        }
+    },
+    "environment": {
+        "default": "development",
+        "development": {
+            "networks": [],
+            "sandboxes": [
+                "local"
+            ]
+        },
+        "testing": {
+            "networks": [
+                "ghostnet"
+            ],
+            "sandboxes": [],
+            "aliases": {
+                "pokeGame": {
+                    "address": "KT1S4YkPbcR2kRP736rgMK8YZSfXhGFFmCif"
+                }
+            }
+        }
+    },
+    "accounts": {
+        "bob": "3_000_000_000",
+        "alice": "3_000_000_000",
+        "john": "3_000_000_000",
+        "jane": "3_000_000_000",
+        "joe": "3_000_000_000"
+    },
+    "plugins": [
+        {
+            "name": "@taqueria/plugin-ligo",
+            "type": "npm"
+        },
+        {
+            "name": "@taqueria/plugin-tezos-client",
+            "type": "npm"
+        },
+        {
+            "name": "@taqueria/plugin-taquito",
+            "type": "npm"
+        },
+        {
+            "name": "@taqueria/plugin-contract-types",
+            "type": "npm"
+        }
+    ],
+    "projectDir": "/home/zamrokk/training-dapp-2/solution",
+    "configFile": "/home/zamrokk/training-dapp-2/solution/.taq/config.json",
+    "hash": "ef6dc6f37a546fa941dc7825c086ac3a63aecf914dedd913003e5bcaaca23e02"
+}

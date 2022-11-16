@@ -22,7 +22,7 @@ const _test_mutation = () : unit => {
     ([] : list<[unit,mutation]>) => unit,
     ([head,..._tail] : list<[unit,mutation]>) => {Test.log(head);assert_with_error(false,Test.to_string(head[1]))}
   ]));
-  
+
 }
 
-const test_mutation = _test_mutation(); 
+const test_mutation = _test_mutation();
