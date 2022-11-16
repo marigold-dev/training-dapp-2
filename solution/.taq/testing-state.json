@@ -28,6 +28,20 @@
                     "destination": "https://ghostnet.tezos.marigold.dev"
                 }
             ]
+        },
+        "@taqueria/plugin-taquito.deploy.1668593832136": {
+            "task": "deploy",
+            "plugin": "@taqueria/plugin-taquito",
+            "time": 1668593832136,
+            "output": [
+                {
+                    "contract": "pokeGame.tz",
+                    "address": "KT1XvJDkHK4HaRFPj7GU4ammxu8t9gbiaDHg",
+                    "alias": "pokeGame",
+                    "balanceInMutez": "0",
+                    "destination": "https://ghostnet.tezos.marigold.dev"
+                }
+            ]
         }
     }
 }

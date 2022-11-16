@@ -544,7 +544,7 @@ Go to your source file pokeGame.jsligo, and annotate the function `pokeAndGetFee
 
 ```jsligo
 // @no_mutation
-const pokeAndGetFeedback
+const pokeAndGetFeedback ...
 ```
 
 Run again the mutation tests
