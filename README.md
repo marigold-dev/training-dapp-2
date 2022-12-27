@@ -648,7 +648,7 @@ yarn run start
 
 On the listed contract, choose your line and input the address of the contract you will receive a feedback. Click on `poke`
 
-![result](/doc/result.png)
+![result](./doc/result.png)
 
 This time, the logged user will receive a feedback from a targeted contract (as input of the form) via any listed contract (the first column of the table).
 
