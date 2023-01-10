@@ -5,6 +5,7 @@ description: Training n°2 for decentralized application
 ---
 
 ## :round_pushpin: [See Github version and full code here](https://github.com/marigold-dev/training-dapp-2)
+
 # Training dapp n°2
 
 # :point_up: Poke game (enhanced)
@@ -662,4 +663,6 @@ Now, you are able to call other contracts, use views and test you smart contract
 
 On next training, you will learn how to use tickets
 
-[:arrow_right: NEXT](https://github.com/marigold-dev/training-dapp-3)
+[:arrow_right: NEXT (HTML version)](https://marigold-dev.github.io/training-dapp-3)
+
+[:arrow_right: NEXT (Github version)](https://github.com/marigold-dev/training-dapp-3)
