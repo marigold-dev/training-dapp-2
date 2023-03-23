@@ -1,45 +1,31 @@
 {
     "operations": {},
     "tasks": {
-        "@taqueria/plugin-taquito.deploy.1668588734874": {
+        "@taqueria/plugin-taquito.deploy.1679591254759": {
             "task": "deploy",
             "plugin": "@taqueria/plugin-taquito",
-            "time": 1668588734874,
+            "time": 1679591254759,
             "output": [
                 {
                     "contract": "pokeGame.tz",
-                    "address": "KT1JSuVL6yrd2XSbdqghJCz48qmbdVZfy57K",
+                    "address": "KT1X3WqkSpHLhKkH6ZKWsRQ5N2meQsU8mX4J",
                     "alias": "pokeGame",
                     "balanceInMutez": "0",
                     "destination": "https://ghostnet.ecadinfra.com"
                 }
             ]
         },
-        "@taqueria/plugin-taquito.deploy.1668588876359": {
+        "@taqueria/plugin-taquito.deploy.1679591864905": {
             "task": "deploy",
             "plugin": "@taqueria/plugin-taquito",
-            "time": 1668588876359,
+            "time": 1679591864905,
             "output": [
                 {
                     "contract": "pokeGame.tz",
-                    "address": "KT19jEAyrvsMzY6DQ42UsR6KF3duKHJMJyPZ",
+                    "address": "KT1MxiLwFM7JuveUV6uHHoUahgBcpJcdjq68",
                     "alias": "pokeGame",
                     "balanceInMutez": "0",
-                    "destination": "https://ghostnet.tezos.marigold.dev"
-                }
-            ]
-        },
-        "@taqueria/plugin-taquito.deploy.1668593832136": {
-            "task": "deploy",
-            "plugin": "@taqueria/plugin-taquito",
-            "time": 1668593832136,
-            "output": [
-                {
-                    "contract": "pokeGame.tz",
-                    "address": "KT1XvJDkHK4HaRFPj7GU4ammxu8t9gbiaDHg",
-                    "alias": "pokeGame",
-                    "balanceInMutez": "0",
-                    "destination": "https://ghostnet.tezos.marigold.dev"
+                    "destination": "https://ghostnet.ecadinfra.com"
                 }
             ]
         }
