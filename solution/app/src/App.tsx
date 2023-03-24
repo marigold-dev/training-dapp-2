@@ -20,6 +20,8 @@ function App() {
     })
   );
 
+  const [contractToPoke, setContractToPoke] = useState<string>("");
+
   useEffect(() => {
     Tezos.setWalletProvider(wallet);
     (async () => {
@@ -34,7 +36,6 @@ function App() {
 
   const [userAddress, setUserAddress] = useState<string>("");
   const [userBalance, setUserBalance] = useState<number>(0);
-  const [contractToPoke, setContractToPoke] = useState<string>("");
 
   const contractsService = new ContractsService({
     baseUrl: "https://api.ghostnet.tzkt.io",
@@ -42,18 +43,6 @@ function App() {
     withCredentials: false,
   });
   const [contracts, setContracts] = useState<Array<Contract>>([]);
-
-  const fetchContracts = () => {
-    (async () => {
-      setContracts(
-        await contractsService.getSimilar({
-          address: process.env["REACT_APP_CONTRACT_ADDRESS"]!,
-          includeStorage: true,
-          sort: { desc: "id" },
-        })
-      );
-    })();
-  };
 
   //poke
   const poke = async (
@@ -72,6 +61,18 @@ function App() {
       console.log(error);
       console.table(`Error: ${JSON.stringify(error, null, 2)}`);
     }
+  };
+
+  const fetchContracts = () => {
+    (async () => {
+      setContracts(
+        await contractsService.getSimilar({
+          address: process.env["REACT_APP_CONTRACT_ADDRESS"]!,
+          includeStorage: true,
+          sort: { desc: "id" },
+        })
+      );
+    })();
   };
 
   return (
@@ -97,6 +98,7 @@ function App() {
         <br />
         <div>
           <button onClick={fetchContracts}>Fetch contracts</button>
+
           <table>
             <thead>
               <tr>

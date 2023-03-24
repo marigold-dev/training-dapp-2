@@ -1,3 +1,4 @@
+
 export type pokeMessage = {
     receiver : address,
     feedback : string
@@ -11,7 +12,8 @@ export type storage = {
 /*
 type returned_feedback = [address, string]; //address that gives feedback and a string message
 
-type oracle_param = contract<returned_feedback>;*/
+type oracle_param = contract<returned_feedback>;
+*/
 
 export type parameter =
 | ["Poke"]
@@ -23,19 +25,10 @@ export type parameter =
 export type return_ = [list<operation>, storage];
 
 export const poke = (store : storage) : return_ => {
-    let feedbackMessage = {receiver : Tezos.get_self_address() ,feedback: ""};
+    let feedbackMessage = {receiver : Tezos.get_self_address() ,feedback: ""};    
     return [  list([]) as list<operation>, {...store,
         pokeTraces : Map.add(Tezos.get_source(), feedbackMessage, store.pokeTraces) }];
 };
-
-/*
-const getFeedback = ([contract_callback,store] : [contract<returned_feedback>,storage]): return_ => {
-    let op : operation = Tezos.transaction(
-            [Tezos.get_self_address(),store.feedback],
-            (0 as mutez),
-            contract_callback);
-    return [list([op]) ,store];
-};*/
 
 // @no_mutation
 export const pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ => {
@@ -52,21 +45,30 @@ export const pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : re
   });
 };
 
+
 /*
 const pokeAndGetFeedbackCallback = ([feedback,store] : [returned_feedback , storage]) : return_ => {
     let feedbackMessage = {receiver : feedback[0] ,feedback: feedback[1]};
     return [  list([]) as list<operation>, {...store,
         pokeTraces : Map.add(Tezos.get_source(), feedbackMessage , store.pokeTraces) }];
-};*/
+};
+
+
+const getFeedback = ([contract_callback,store] : [contract<returned_feedback>,storage]): return_ => {
+    let op : operation = Tezos.transaction(
+            [Tezos.get_self_address(),store.feedback],
+            (0 as mutez),
+            contract_callback);
+    return [list([op]) ,store];
+};
+*/
 
 export const main = ([action, store] : [parameter, storage]) : return_ => {
     return match (action, {
         Poke: () => poke(store),
         PokeAndGetFeedback: (other : address) => pokeAndGetFeedback(other,store)
-        /*PokeAndGetFeedbackCallback: (feedback : returned_feedback) => pokeAndGetFeedbackCallback(feedback,store),
-        GetFeedback: (contract_callback: oracle_param)=> getFeedback(contract_callback,store)*/
-    }
-    )
+      }
+    );
 };
 
 // @view
