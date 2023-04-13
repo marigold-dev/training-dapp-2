@@ -1,0 +1,11 @@
+#import "contract.jsligo" "Contract"
+
+const _test_increment = () : bool => {
+   let initial_storage = 42;
+   let [address, _, _] = Test.originate(Contract.main, initial_storage, 0 as tez);
+   let contract = Test.to_contract(address);
+   let _r = Test.transfer_to_contract_exn(contract, (Increment (1)), 1 as mutez);
+   return (Test.get_storage(address) == initial_storage + 1);
+}
+
+const test_increment = _test_increment();

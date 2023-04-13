@@ -2,6 +2,7 @@
 
 export type main_fn = (parameter : PokeGame.parameter, storage : PokeGame.storage) => PokeGame.return_ ;
 
+
 // reset state
 const _ = Test.reset_state ( 2 as nat, list([]) as list <tez> );
 const faucet = Test.nth_bootstrap_account(0);
@@ -16,7 +17,7 @@ const _ = Test.set_source(faucet);
 export const _testPoke = (main : main_fn , s: address) : unit => {
 
     //contract origination
-    const [taddr, _, _] = Test.originate_module(contract_of(PokeGame),  {pokeTraces : Map.empty as map<address, PokeGame.pokeMessage> , feedback : "kiss"}, 0 as tez);
+    const [taddr, _, _] = Test.originate(main, {pokeTraces : Map.empty as map<address, PokeGame.pokeMessage> , feedback : "kiss"}, 0 as tez);
     const contr = Test.to_contract(taddr);
     const contrAddress = Tezos.address(contr);
     const _ = Test.log("contract deployed with values : ");
@@ -24,7 +25,7 @@ export const _testPoke = (main : main_fn , s: address) : unit => {
 
     Test.set_source(s);
 
-    const status = Test.transfer_to_contract(contr, unit, 0 as tez);
+    const status = Test.transfer_to_contract(contr, Poke() as PokeGame.parameter, 0 as tez);
     Test.log(status);
 
     const store : PokeGame.storage = Test.get_storage(taddr);

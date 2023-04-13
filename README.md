@@ -45,7 +45,7 @@ Reuse the previous smart contract : https://github.com/marigold-dev/training-dap
 Note : To get libraries ready (if you start from fresh project clone), run :
 
 ```bash
-yarn install
+npm i && cd app && yarn install
 ```
 
 Either you can poke the contract, either you can poke another contract through one and get a feedback.
@@ -71,7 +71,8 @@ type storage = {
 Your poke function has changed to
 
 ```ligolang
-const poke = (store : storage) : return_ => {
+//@entry
+const poke = (_ : parameter, store : storage) : return_ => {
     let feedbackMessage = {receiver : Tezos.get_self_address() ,feedback: ""};
     return [  list([]) as list<operation>, {...store,
         pokeTraces : Map.add(Tezos.get_source(), feedbackMessage, store.pokeTraces) }];
@@ -102,10 +103,10 @@ const default_storage = {
 Then compile your contract
 
 ```bash
-taq compile pokeGame.jsligo
+TAQ_LIGO_IMAGE=ligolang/ligo:next taq compile pokeGame.jsligo
 ```
 
-We will write the pokeAndGetFeedback function later, let pass to unit testing
+We will write the pokeAndGetFeedback function later, let's do unit testing !
 
 ## Step 2 : Write unit tests
 
@@ -130,7 +131,7 @@ taq create contract unit_pokeGame.jsligo
 Edit the file
 
 ```ligolang
-#include "./pokeGame.jsligo"
+#import "./pokeGame.jsligo" "CONTRACT"
 
 // reset state
 const _ = Test.reset_state ( 2 as nat, list([]) as list <tez> );
@@ -143,7 +144,7 @@ const _ = Test.set_baker(faucet);
 const _ = Test.set_source(faucet);
 
 //contract origination
-const [taddr, _, _] = Test.originate(main, {pokeTraces : Map.empty as map<address, pokeMessage> , feedback : "kiss"}, 0 as tez);
+const [taddr, _, _] = Test.originate_module(contract_of(CONTRACT),  {pokeTraces : Map.empty as map<address, CONTRACT.pokeMessage> , feedback : "kiss"}, 0 as tez);
 const contr = Test.to_contract(taddr);
 const contrAddress = Tezos.address(contr);
 const _ = Test.log("contract deployed with values : ");
@@ -153,7 +154,7 @@ const _ = Test.log(contr);
 export const _testPoke = (s : address) : unit => {
     Test.set_source(s);
 
-    let status = Test.transfer_to_contract(contr, Poke() as parameter, 0 as tez);
+    let status = Test.transfer_to_contract(contr, unit as CONTRACT.parameter, 0 as tez);
     Test.log(status);
 
     let store : storage = Test.get_storage(taddr);
@@ -175,10 +176,10 @@ export const _testPoke = (s : address) : unit => {
 
 Explanations :
 
-- `#include "./pokeGame.jsligo"` to include the source file in order to call functions and use object definitions
+- `#import "./pokeGame.jsligo" "CONTRACT"` to import the source file as module in order to call functions and use object definitions
 - `Test.reset_state ( 2...` this creates two implicit accounts on the test environment
 - `Test.nth_bootstrap_account` this return the nth account from the environment
-- `Test.originate(MAIN_FUNCTION, INIT_STORAGE, INIT_BALANCE)` will originate a smart contract into the environment
+- `Test.originate(MAIN_FUNCTION, INIT_STORAGE, INIT_BALANCE)` will originate a smart contract into the environment. Here we specify that the main function comes from the conversion of a module to a contract
 - `Test.to_contract(taddr)` and `Tezos.address(contr)` are util functions to convert typed addresses, contract and contract addresses
 - `let _testPoke = (s : address) : unit => {...}` declaring function starting with `_` will not be part of the test run results. Use this to factorize tests changing only the parameters of the function for different scenarios
 - `Test.set_source` do not forget to set this value for the transaction signer
@@ -192,7 +193,7 @@ Explanations :
 Run the test
 
 ```bash
-taq test unit_pokeGame.jsligo
+TAQ_LIGO_IMAGE=ligolang/ligo:next taq test unit_pokeGame.jsligo
 ```
 
 Output should give you intermediary logs and finally the test results
@@ -239,29 +240,9 @@ Then the function to call on the second contract is `GetFeedback: (contract_call
 Edit the file pokeGame.jsligo, starting with the main function and some types to (re)define :
 
 ```ligolang
-...
-
 type returned_feedback = [address, string]; //address that gives feedback and a string message
 
 type oracle_param = contract<returned_feedback>;
-
-type parameter =
-| ["Poke"]
-| ["PokeAndGetFeedback", address]
-| ["PokeAndGetFeedbackCallback", returned_feedback]
-| ["GetFeedback",oracle_param];
-
-...
-
-const main = ([action, store] : [parameter, storage]) : return_ => {
-    return match (action, {
-        Poke: () => poke(store),
-        PokeAndGetFeedback: (other : address) => pokeAndGetFeedback(other,store),
-        PokeAndGetFeedbackCallback: (feedback : returned_feedback) => pokeAndGetFeedbackCallback(feedback,store),
-        GetFeedback: (contract_callback: oracle_param)=> getFeedback(contract_callback,store)
-    }
-    )
-};
 ```
 
 Explanations :
@@ -274,7 +255,8 @@ We need to write the missing functions, starting with `getFeedback`
 Add this new function (before the main method)
 
 ```ligolang
-const getFeedback = ([contract_callback,store] : [contract<returned_feedback>,storage]): return_ => {
+//@entry
+const getFeedback = (contract_callback : contract<returned_feedback>, store : storage): return_ => {
     let op : operation = Tezos.transaction(
             [Tezos.get_self_address(),store.feedback],
             (0 as mutez),
@@ -283,14 +265,14 @@ const getFeedback = ([contract_callback,store] : [contract<returned_feedback>,st
 };
 ```
 
-- `([param1,param2] : [param1Type,param2Type])` actually jsligo is not able to use the several parameters definition in a row like this `(param1 : param1Type ,param2 : param2Type)`, you will require to use pairs as above
 - `Tezos.transaction(RETURNED_PARAMS,TEZ_COST,CALLBACK_CONTRACT)` the oracle function requires to return the value back to the contract caller that is passed already as first parameter
 - `return [list([op]) ,store]` this time, you return a list of operations to execute, there is no need to update the contract storage (but it is a mandatory return object)
 
 Add now, the first part of the function `pokeAndGetFeedback`
 
 ```ligolang
-const pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ => {
+//@entry
+const pokeAndGetFeedback = (oracleAddress : address, store : storage) : return_ => {
 
   //Prepares call to oracle
   let call_to_oracle = () : contract<oracle_param> => {
@@ -316,7 +298,8 @@ const pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ =
 Let's write the last missing function `pokeAndGetFeedbackCallback` that will receive the feedback and finally store it
 
 ```ligolang
-const pokeAndGetFeedbackCallback = ([feedback,store] : [returned_feedback , storage]) : return_ => {
+//@entry
+const pokeAndGetFeedbackCallback = (feedback : returned_feedback, store : storage) : return_ => {
     let feedbackMessage = {receiver : feedback[0] ,feedback: feedback[1]};
     return [  list([]) as list<operation>, {...store,
         pokeTraces : Map.add(Tezos.get_source(), feedbackMessage , store.pokeTraces) }];
@@ -329,7 +312,7 @@ const pokeAndGetFeedbackCallback = ([feedback,store] : [returned_feedback , stor
 Just compile the contract. Check if it passes correctly
 
 ```bash
-taq compile pokeGame.jsligo
+TAQ_LIGO_IMAGE=ligolang/ligo:next taq compile pokeGame.jsligo
 ```
 
 (Optional) Write a unit test for this new function `pokeAndGetFeedback`
@@ -355,13 +338,12 @@ sequenceDiagram
 :warning: **Comment all of this (with `/* */` syntax or // syntax)** :
 
 - previous functions `pokeAndGetFeedbackCallback` and `getFeedback`
-- `parameter` variant useless declarations
-- in the `match` of `main` function, comment the useless cases `PokeAndGetFeedbackCallback` and `GetFeedback`
 
 Edit function `pokeAndGetFeedback` to do a read view operation instead of a transaction call
 
 ```ligolang
-const pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ => {
+//@entry
+const pokeAndGetFeedback = (oracleAddress : address, store : storage) : return_ => {
   //Read the feedback view
   let feedbackOpt : option<string> = Tezos.call_view("feedback", unit, oracleAddress);
 
@@ -386,7 +368,7 @@ const feedback = ([_, store] : [unit, storage]) : string => { return store.feedb
 Just compile the contract. Check if it passes correctly
 
 ```bash
-taq compile pokeGame.jsligo
+TAQ_LIGO_IMAGE=ligolang/ligo:next taq compile pokeGame.jsligo
 ```
 
 (Optional) Write a unit test for the updated function `pokeAndGetFeedback`
@@ -445,7 +427,7 @@ Let's explain it first
 - `#import <SRC_FILE> <NAMESPACE>` : import your source code that will be mutated and your unit tests. For more information [module doc](https://ligolang.org/docs/language-basics/modules)
 - `let _tests = (main : PokeGameTest.main_fn) : unit` : you need to provide the test suite that will be run by the framework. As we don't have a main function, we just wrap it into a global function
 - `let _test_mutation = () : unit =>` : this is the definition of the mutations tests
-- `Test.mutation_test_all(PokeGame.main,_tests)` : This will take the first argument as the source code to mutate and the second argument as unit test suite funtion to run over. It returns a list of mutations that succeed (if size > 0 then bad test coverage) or empty list (good, even mutants did not harm your code)
+- `Test.mutation_test_all(contract_of(PokeGame),_tests)` : This will take the first argument as the source code to mutate and the second argument as unit test suite funtion to run over. It returns a list of mutations that succeed (if size > 0 then bad test coverage) or empty list (good, even mutants did not harm your code)
 - `let test_mutation = _test_mutation();` : as you see it works the same as ligo unit tests and will be run the same way
 
 As we need to point to some function from other files, we will have to expose this.
@@ -458,10 +440,6 @@ export type pokeMessage = {
 export type storage = {
 ...
 export type return_ = [list<operation>, storage];
-...
-export type parameter =
-...
-export const main = ([action, store] : [parameter, storage]) : return_ => {
 ```
 
 and edit `unit_pokeGame.jsligo` too, this time, we will have to change a bit the code itself to be able to pass the source code to originate as parameter, that way, we saw that the mutation framework is able to inject different versions of it. Move contract origination code block inside the `_testPoke` function this time.
@@ -517,7 +495,7 @@ export const _testPoke = (main : main_fn , s: address) : unit => {
 All is ok, let's run it
 
 ```bash
-taq test mutation_pokeGame.jsligo
+TAQ_LIGO_IMAGE=ligolang/ligo:next taq test mutation_pokeGame.jsligo
 ```
 
 Output :

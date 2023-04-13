@@ -17,7 +17,7 @@ const _tests = (main : PokeGameTest.main_fn) : unit => {
 };
 
 const _test_mutation = () : unit => {
-  const mutationErrorList = Test.mutation_test_all(contract_of(PokeGame),_tests);
+  const mutationErrorList = Test.mutation_test_all(PokeGame.main,_tests);
   match(mutationErrorList,list([
     ([] : list<[unit,mutation]>) => unit,
     ([head,..._tail] : list<[unit,mutation]>) => {Test.log(head);assert_with_error(false,Test.to_string(head[1]))}
