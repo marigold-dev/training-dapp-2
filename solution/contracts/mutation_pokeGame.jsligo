@@ -12,17 +12,15 @@ const _ = Test.set_baker(faucet);
 const _ = Test.set_source(faucet);
 
 
-const _tests = (main : PokeGameTest.main_fn) : unit => {
-  return PokeGameTest._testPoke(main,sender1);
+const _tests = (ta: typed_address<parameter_of PokeGame, PokeGame.storage>, _: michelson_contract, _: int) : unit => {
+  return PokeGameTest._testPoke(ta,sender1);
 };
 
-const _test_mutation = () : unit => {
-  const mutationErrorList = Test.mutation_test_all(PokeGame.main,_tests);
+const test_mutation = (() : unit => {
+  const mutationErrorList = Test.originate_module_and_mutate_all(contract_of(PokeGame), PokeGameTest.initial_storage, PokeGameTest.initial_tez, _tests);
   match(mutationErrorList,list([
     ([] : list<[unit,mutation]>) => unit,
-    ([head,..._tail] : list<[unit,mutation]>) => {Test.log(head);assert_with_error(false,Test.to_string(head[1]))}
+    ([head,..._tail] : list<[unit,mutation]>) => {Test.log(head);Test.assert_with_error(false,Test.to_string(head[1]))}
   ]));
 
-}
-
-const test_mutation = _test_mutation();
+})();

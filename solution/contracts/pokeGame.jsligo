@@ -1,37 +1,42 @@
-
-export type pokeMessage = {
+type pokeMessage = {
     receiver : address,
     feedback : string
 };
 
-export type storage = {
+type storage = {
     pokeTraces : map<address, pokeMessage>,
     feedback : string
 };
 
-/*
+type parameter = unit;
+
 type returned_feedback = [address, string]; //address that gives feedback and a string message
 
 type oracle_param = contract<returned_feedback>;
-*/
 
-export type parameter =
-| ["Poke"]
-| ["PokeAndGetFeedback", address]
-//| ["PokeAndGetFeedbackCallback", returned_feedback]
-//| ["GetFeedback",oracle_param]
-;
+type return_ = [list<operation>, storage];
 
-export type return_ = [list<operation>, storage];
-
-export const poke = (store : storage) : return_ => {
-    let feedbackMessage = {receiver : Tezos.get_self_address() ,feedback: ""};    
+//@entry
+const poke = (_ : parameter, store : storage) : return_ => {
+    let feedbackMessage = {receiver : Tezos.get_self_address() ,feedback: ""};
     return [  list([]) as list<operation>, {...store,
         pokeTraces : Map.add(Tezos.get_source(), feedbackMessage, store.pokeTraces) }];
 };
 
-// @no_mutation
-export const pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : return_ => {
+/*
+//@entry
+const getFeedback = (contract_callback : contract<returned_feedback>, store : storage): return_ => {
+    let op : operation = Tezos.transaction(
+            [Tezos.get_self_address(),store.feedback],
+            (0 as mutez),
+            contract_callback);
+    return [list([op]) ,store];
+};
+*/
+
+//@no_mutation
+//@entry
+const pokeAndGetFeedback = (oracleAddress : address, store : storage) : return_ => {
   //Read the feedback view
   let feedbackOpt : option<string> = Tezos.call_view("feedback", unit, oracleAddress);
 
@@ -45,31 +50,14 @@ export const pokeAndGetFeedback = ([oracleAddress,store]:[address,storage]) : re
   });
 };
 
-
 /*
-const pokeAndGetFeedbackCallback = ([feedback,store] : [returned_feedback , storage]) : return_ => {
+//@entry
+const pokeAndGetFeedbackCallback = (feedback : returned_feedback, store : storage) : return_ => {
     let feedbackMessage = {receiver : feedback[0] ,feedback: feedback[1]};
     return [  list([]) as list<operation>, {...store,
         pokeTraces : Map.add(Tezos.get_source(), feedbackMessage , store.pokeTraces) }];
 };
-
-
-const getFeedback = ([contract_callback,store] : [contract<returned_feedback>,storage]): return_ => {
-    let op : operation = Tezos.transaction(
-            [Tezos.get_self_address(),store.feedback],
-            (0 as mutez),
-            contract_callback);
-    return [list([op]) ,store];
-};
 */
-
-export const main = ([action, store] : [parameter, storage]) : return_ => {
-    return match (action, {
-        Poke: () => poke(store),
-        PokeAndGetFeedback: (other : address) => pokeAndGetFeedback(other,store)
-      }
-    );
-};
 
 // @view
 const feedback = ([_, store] : [unit, storage]) : string => { return store.feedback };
