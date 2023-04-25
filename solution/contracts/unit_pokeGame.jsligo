@@ -1,6 +1,6 @@
 #import "./pokeGame.jsligo" "PokeGame"
 
-export type main_fn = (parameter : PokeGame.parameter, storage : PokeGame.storage) => PokeGame.return_ ;
+export type main_fn = module_contract<parameter_of PokeGame, PokeGame.storage>;
 
 // reset state
 const _ = Test.reset_state ( 2 as nat, list([]) as list <tez> );
@@ -12,11 +12,14 @@ const _ = Test.log(Test.get_balance(sender1));
 const _ = Test.set_baker(faucet);
 const _ = Test.set_source(faucet);
 
+const initial_storage = {pokeTraces : Map.empty as map<address, PokeGame.pokeMessage> , feedback : "kiss"};
+const initial_tez = 0 as tez;
+
 //functions
-export const _testPoke = (main : main_fn , s: address) : unit => {
+export const _testPoke = (taddr : typed_address<parameter_of PokeGame, PokeGame.storage>, s: address) : unit => {
 
     //contract origination
-    const [taddr, _, _] = Test.originate_module(contract_of(PokeGame),  {pokeTraces : Map.empty as map<address, PokeGame.pokeMessage> , feedback : "kiss"}, 0 as tez);
+    //const [taddr, _, _] = Test.originate_module(contract_of(PokeGame),  {pokeTraces : Map.empty as map<address, PokeGame.pokeMessage> , feedback : "kiss"}, 0 as tez);
     const contr = Test.to_contract(taddr);
     const contrAddress = Tezos.address(contr);
     const _ = Test.log("contract deployed with values : ");
@@ -24,7 +27,7 @@ export const _testPoke = (main : main_fn , s: address) : unit => {
 
     Test.set_source(s);
 
-    const status = Test.transfer_to_contract(contr, unit, 0 as tez);
+    const status = Test.transfer_to_contract(contr, Poke(), 0 as tez);
     Test.log(status);
 
     const store : PokeGame.storage = Test.get_storage(taddr);
@@ -32,7 +35,7 @@ export const _testPoke = (main : main_fn , s: address) : unit => {
 
     //check poke is registered
     match(Map.find_opt (s, store.pokeTraces), {
-        Some: (pokeMessage: pokeMessage) => { assert_with_error(pokeMessage.feedback == "","feedback "+pokeMessage.feedback+" is not equal to expected "+"(empty)"); assert_with_error(pokeMessage.receiver == contrAddress,"receiver is not equal");} ,
+        Some: (pokeMessage: PokeGame.pokeMessage) => { assert_with_error(pokeMessage.feedback == "","feedback "+pokeMessage.feedback+" is not equal to expected "+"(empty)"); assert_with_error(pokeMessage.receiver == contrAddress,"receiver is not equal");} ,
         None: () => assert_with_error(false,"don't find traces")
        });
 
@@ -41,4 +44,7 @@ export const _testPoke = (main : main_fn , s: address) : unit => {
 
   //********** TESTS *************/
 
-  const testSender1Poke = _testPoke(PokeGame.main,sender1);
+const testSender1Poke = (() : unit => {
+  const [taddr, _, _] = Test.originate_module(contract_of(PokeGame), initial_storage, initial_tez);
+  _testPoke(taddr, sender1);
+})();

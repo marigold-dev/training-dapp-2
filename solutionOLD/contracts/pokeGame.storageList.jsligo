@@ -1,5 +1,0 @@
-#include "pokeGame.jsligo"
-const default_storage = {
-    pokeTraces : Map.empty as map<address, pokeMessage>,
-    feedback : "kiss"
-};

@@ -7,6 +7,7 @@ import "./App.css";
 import ConnectButton from "./ConnectWallet";
 import DisconnectButton from "./DisconnectWallet";
 import { PokeGameWalletType } from "./pokeGame.types";
+import { address } from "./type-aliases";
 
 function App() {
   const [Tezos, setTezos] = useState<TezosToolkit>(
@@ -18,6 +19,7 @@ function App() {
       preferredNetwork: NetworkType.GHOSTNET,
     })
   );
+  const [contractToPoke, setContractToPoke] = useState<string>("");
 
   const contractsService = new ContractsService({
     baseUrl: "https://api.ghostnet.tzkt.io",
@@ -38,15 +40,21 @@ function App() {
     })();
   };
 
-  const poke = async (contract: Contract) => {
-    let c: PokeGameWalletType = await Tezos.wallet.at<PokeGameWalletType>(
-      "" + contract.address
-    );
+  //poke
+  const poke = async (
+    e: React.FormEvent<HTMLFormElement>,
+    contract: Contract
+  ) => {
+    e.preventDefault();
+    let c: PokeGameWalletType = await Tezos.wallet.at("" + contract.address);
     try {
-      const op = await c.methods.default().send();
+      const op = await c.methods
+        .pokeAndGetFeedback(contractToPoke as address)
+        .send();
       await op.confirmation();
       alert("Tx done");
     } catch (error: any) {
+      console.log(error);
       console.table(`Error: ${JSON.stringify(error, null, 2)}`);
     }
   };
@@ -92,7 +100,7 @@ function App() {
             <thead>
               <tr>
                 <th>address</th>
-                <th>people</th>
+                <th>trace "contract - feedback - user"</th>
                 <th>action</th>
               </tr>
             </thead>
@@ -101,10 +109,31 @@ function App() {
                 <tr>
                   <td style={{ borderStyle: "dotted" }}>{contract.address}</td>
                   <td style={{ borderStyle: "dotted" }}>
-                    {contract.storage.join(", ")}
+                    {contract.storage !== null &&
+                    contract.storage.pokeTraces !== null &&
+                    Object.entries(contract.storage.pokeTraces).length > 0
+                      ? Object.keys(contract.storage.pokeTraces).map(
+                          (k: string) =>
+                            contract.storage.pokeTraces[k].receiver +
+                            " " +
+                            contract.storage.pokeTraces[k].feedback +
+                            " " +
+                            k +
+                            ", "
+                        )
+                      : ""}
                   </td>
                   <td style={{ borderStyle: "dotted" }}>
-                    <button onClick={() => poke(contract)}>Poke</button>
+                    <form onSubmit={(e) => poke(e, contract)}>
+                      <input
+                        type="text"
+                        onChange={(e) =>
+                          setContractToPoke(e.currentTarget.value)
+                        }
+                        placeholder="enter contract address here"
+                      />
+                      <button type="submit">Poke</button>
+                    </form>
                   </td>
                 </tr>
               ))}
