@@ -8,15 +8,18 @@ type storage = {
     feedback : string
 };
 
-type parameter = unit;
+
 
 type returned_feedback = [address, string]; //address that gives feedback and a string message
 
 type oracle_param = contract<returned_feedback>;
 
+
+type parameter = unit;
+
 type return_ = [list<operation>, storage];
 
-//@entry
+@entry
 const poke = (_ : parameter, store : storage) : return_ => {
     let feedbackMessage = {receiver : Tezos.get_self_address() ,feedback: ""};
     return [  list([]) as list<operation>, {...store,
@@ -24,7 +27,7 @@ const poke = (_ : parameter, store : storage) : return_ => {
 };
 
 /*
-//@entry
+@entry
 const getFeedback = (contract_callback : contract<returned_feedback>, store : storage): return_ => {
     let op : operation = Tezos.transaction(
             [Tezos.get_self_address(),store.feedback],
@@ -34,8 +37,8 @@ const getFeedback = (contract_callback : contract<returned_feedback>, store : st
 };
 */
 
-//@no_mutation
-//@entry
+@no_mutation
+@entry
 const pokeAndGetFeedback = (oracleAddress : address, store : storage) : return_ => {
   //Read the feedback view
   let feedbackOpt : option<string> = Tezos.call_view("feedback", unit, oracleAddress);
@@ -50,8 +53,9 @@ const pokeAndGetFeedback = (oracleAddress : address, store : storage) : return_ 
   });
 };
 
+
 /*
-//@entry
+@entry
 const pokeAndGetFeedbackCallback = (feedback : returned_feedback, store : storage) : return_ => {
     let feedbackMessage = {receiver : feedback[0] ,feedback: feedback[1]};
     return [  list([]) as list<operation>, {...store,
@@ -59,5 +63,5 @@ const pokeAndGetFeedbackCallback = (feedback : returned_feedback, store : storag
 };
 */
 
-// @view
+@view
 const feedback = ([_, store] : [unit, storage]) : string => { return store.feedback };

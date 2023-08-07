@@ -71,7 +71,7 @@ type storage = {
 Your poke function has changed to
 
 ```ligolang
-//@entry
+@entry
 const poke = (_ : parameter, store : storage) : return_ => {
     let feedbackMessage = {receiver : Tezos.get_self_address() ,feedback: ""};
     return [  list([]) as list<operation>, {...store,
@@ -103,7 +103,7 @@ const default_storage = {
 Then compile your contract
 
 ```bash
-TAQ_LIGO_IMAGE=ligolang/ligo:next taq compile pokeGame.jsligo
+TAQ_LIGO_IMAGE=ligolang/ligo:0.71.0 taq compile pokeGame.jsligo
 ```
 
 We will write the pokeAndGetFeedback function later, let's do unit testing first !
@@ -203,7 +203,7 @@ Explanations :
 Run the test
 
 ```bash
-TAQ_LIGO_IMAGE=ligolang/ligo:next taq test unit_pokeGame.jsligo
+TAQ_LIGO_IMAGE=ligolang/ligo:0.71.0 taq test unit_pokeGame.jsligo
 ```
 
 Output should give you intermediary logs and finally the test results
@@ -265,7 +265,7 @@ We need to write the missing functions, starting with `getFeedback`
 Add this new function at the end of the file
 
 ```ligolang
-//@entry
+@entry
 const getFeedback = (contract_callback : contract<returned_feedback>, store : storage): return_ => {
     let op : operation = Tezos.transaction(
             [Tezos.get_self_address(),store.feedback],
@@ -281,7 +281,7 @@ const getFeedback = (contract_callback : contract<returned_feedback>, store : st
 Add now, the first part of the function `pokeAndGetFeedback`
 
 ```ligolang
-//@entry
+@entry
 const pokeAndGetFeedback = (oracleAddress : address, store : storage) : return_ => {
 
   //Prepares call to oracle
@@ -308,7 +308,7 @@ const pokeAndGetFeedback = (oracleAddress : address, store : storage) : return_ 
 Let's write the last missing function `pokeAndGetFeedbackCallback` that will receive the feedback and finally store it
 
 ```ligolang
-//@entry
+@entry
 const pokeAndGetFeedbackCallback = (feedback : returned_feedback, store : storage) : return_ => {
     let feedbackMessage = {receiver : feedback[0] ,feedback: feedback[1]};
     return [  list([]) as list<operation>, {...store,
@@ -324,7 +324,7 @@ Just compile the contract. Check if it passes correctly.
 > Note : remove the file `pokeGame.parameterList.jsligo` to remove all unnecessary error logs as we don't need to maintain this file
 
 ```bash
-TAQ_LIGO_IMAGE=ligolang/ligo:next taq compile pokeGame.jsligo
+TAQ_LIGO_IMAGE=ligolang/ligo:0.71.0 taq compile pokeGame.jsligo
 ```
 
 (Optional) Write a unit test for this new function `pokeAndGetFeedback`
@@ -347,14 +347,14 @@ sequenceDiagram
   Note left of SM: store feedback from P
 ```
 
-:warning: **Comment all of this (with `/* */` syntax or // syntax)** :
+:warning: **Comment all below (with `/* */` syntax or // syntax)** :
 
 - previous functions `pokeAndGetFeedbackCallback` and `getFeedback`
 
 Edit function `pokeAndGetFeedback` to do a read view operation instead of a transaction call
 
 ```ligolang
-//@entry
+@entry
 const pokeAndGetFeedback = (oracleAddress : address, store : storage) : return_ => {
   //Read the feedback view
   let feedbackOpt : option<string> = Tezos.call_view("feedback", unit, oracleAddress);
@@ -373,14 +373,14 @@ const pokeAndGetFeedback = (oracleAddress : address, store : storage) : return_ 
 Declare the view at the end of the file. Do not forget the annotation @view in comments
 
 ```ligolang
-// @view
+@view
 const feedback = ([_, store] : [unit, storage]) : string => { return store.feedback };
 ```
 
 Just compile the contract. Check if it passes correctly
 
 ```bash
-TAQ_LIGO_IMAGE=ligolang/ligo:next taq compile pokeGame.jsligo
+TAQ_LIGO_IMAGE=ligolang/ligo:0.71.0 taq compile pokeGame.jsligo
 ```
 
 (Optional) Write a unit test for the updated function `pokeAndGetFeedback`
@@ -442,7 +442,7 @@ Let's explain it first
 Let's run it
 
 ```bash
-TAQ_LIGO_IMAGE=ligolang/ligo:next taq test mutation_pokeGame.jsligo
+TAQ_LIGO_IMAGE=ligolang/ligo:0.71.0 taq test mutation_pokeGame.jsligo
 ```
 
 Output :
@@ -485,15 +485,15 @@ As we are lazy today, instead of fixing it, we will see that we can also tell th
 Go to your source file pokeGame.jsligo, and annotate the function `pokeAndGetFeedback` with `@no_mutation`
 
 ```ligolang
-//@no_mutation
-//@entry
+@no_mutation
+@entry
 const pokeAndGetFeedback ...
 ```
 
 Run again the mutation tests
 
 ```bash
-TAQ_LIGO_IMAGE=ligolang/ligo:next taq test mutation_pokeGame.jsligo
+TAQ_LIGO_IMAGE=ligolang/ligo:0.71.0 taq test mutation_pokeGame.jsligo
 ```
 
 Output
@@ -532,7 +532,7 @@ Redeploy a new version of the smart contract.
 > Note : You can set `feedback` value to any action other than `kiss` :kissing: (it will be more fun for tother to discover it)
 
 ```bash
-TAQ_LIGO_IMAGE=ligolang/ligo:next taq compile pokeGame.jsligo
+TAQ_LIGO_IMAGE=ligolang/ligo:0.71.0 taq compile pokeGame.jsligo
 taq generate types ./app/src
 taq deploy pokeGame.tz -e "testing"
 ```
@@ -557,7 +557,7 @@ then change the poke function to set entrypoint to `pokeAndGetFeedback`
 //poke
 const poke = async (
   e: React.FormEvent<HTMLFormElement>,
-  contract: Contract
+  contract: api.Contract
 ) => {
   e.preventDefault();
   let c: PokeGameWalletType = await Tezos.wallet.at("" + contract.address);
@@ -587,7 +587,7 @@ Relaunch the app
 ```bash
 cd app
 yarn install
-yarn run start
+yarn dev
 ```
 
 On the listed contract, choose your line and input the address of the contract you will receive a feedback. Click on `poke`
