@@ -28,6 +28,20 @@
                     "destination": "https://ghostnet.ecadinfra.com"
                 }
             ]
+        },
+        "@taqueria/plugin-taquito.deploy.1695635438654": {
+            "task": "deploy",
+            "plugin": "@taqueria/plugin-taquito",
+            "time": 1695635438654,
+            "output": [
+                {
+                    "contract": "pokeGame.tz",
+                    "address": "KT1GBRmhh6hwvUAfbsMd5Fkx1zf8TTnrez7p",
+                    "alias": "pokeGame",
+                    "balanceInMutez": "0",
+                    "destination": "https://ghostnet.ecadinfra.com"
+                }
+            ]
         }
     }
 }

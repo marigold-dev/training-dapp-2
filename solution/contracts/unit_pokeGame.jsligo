@@ -18,12 +18,12 @@ const _4 = Test.set_baker(faucet);
 
 const _5 = Test.set_source(faucet);
 
-const initial_storage = {
+export const initial_storage = {
   pokeTraces: Map.empty as map<address, PokeGame.pokeMessage>,
   feedback: "kiss"
 };
 
-const initial_tez = 0 as tez;
+export const initial_tez = 0mutez;
 
 //functions
 
@@ -39,15 +39,15 @@ export const _testPoke = (
   Test.log("contract deployed with values : ");
   Test.log(contr);
   Test.set_source(s);
-  const status = Test.transfer_to_contract(contr, Poke, 0 as tez);
-/*
+  const status = Test.transfer_to_contract(contr, Poke(), 0 as tez);
   Test.log(status);
   const store: PokeGame.storage = Test.get_storage(taddr);
   Test.log(store);
   //check poke is registered
 
   match(Map.find_opt(s, store.pokeTraces)) {
-    when (Some(pokeMessage)): do {
+    when (Some(pokeMessage)):
+      do {
         assert_with_error(
           pokeMessage.feedback == "",
           "feedback " + pokeMessage.feedback + " is not equal to expected "
@@ -59,9 +59,8 @@ export const _testPoke = (
         );
       }
     when (None):
-      () => assert_with_error(false, "don't find traces")
-  };*/
-
+      assert_with_error(false, "don't find traces")
+  };
 };
 
 // TESTS //

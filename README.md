@@ -324,7 +324,7 @@ Just compile the contract. Check if it passes correctly.
 > Note : remove the file `pokeGame.parameterList.jsligo` to remove all unnecessary error logs as we don't need to maintain this file
 
 ```bash
-TAQ_LIGO_IMAGE=ligolang/ligo:0.71.0 taq compile pokeGame.jsligo
+TAQ_LIGO_IMAGE=ligolang/ligo:0.73.0 taq compile pokeGame.jsligo
 ```
 
 (Optional) Write a unit test for this new function `pokeAndGetFeedback`
@@ -380,7 +380,7 @@ const feedback = ([_, store] : [unit, storage]) : string => { return store.feedb
 Just compile the contract. Check if it passes correctly
 
 ```bash
-TAQ_LIGO_IMAGE=ligolang/ligo:0.71.0 taq compile pokeGame.jsligo
+TAQ_LIGO_IMAGE=ligolang/ligo:0.73.0 taq compile pokeGame.jsligo
 ```
 
 (Optional) Write a unit test for the updated function `pokeAndGetFeedback`
@@ -442,7 +442,7 @@ Let's explain it first
 Let's run it
 
 ```bash
-TAQ_LIGO_IMAGE=ligolang/ligo:0.71.0 taq test mutation_pokeGame.jsligo
+TAQ_LIGO_IMAGE=ligolang/ligo:0.73.0 taq test mutation_pokeGame.jsligo
 ```
 
 Output :
@@ -493,7 +493,7 @@ const pokeAndGetFeedback ...
 Run again the mutation tests
 
 ```bash
-TAQ_LIGO_IMAGE=ligolang/ligo:0.71.0 taq test mutation_pokeGame.jsligo
+TAQ_LIGO_IMAGE=ligolang/ligo:0.73.0 taq test mutation_pokeGame.jsligo
 ```
 
 Output
@@ -532,7 +532,7 @@ Redeploy a new version of the smart contract.
 > Note : You can set `feedback` value to any action other than `kiss` :kissing: (it will be more fun for tother to discover it)
 
 ```bash
-TAQ_LIGO_IMAGE=ligolang/ligo:0.71.0 taq compile pokeGame.jsligo
+TAQ_LIGO_IMAGE=ligolang/ligo:0.73.0 taq compile pokeGame.jsligo
 taq generate types ./app/src
 taq deploy pokeGame.tz -e "testing"
 ```
