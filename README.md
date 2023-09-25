@@ -203,7 +203,7 @@ Explanations :
 Run the test
 
 ```bash
-TAQ_LIGO_IMAGE=ligolang/ligo:0.71.0 taq test unit_pokeGame.jsligo
+TAQ_LIGO_IMAGE=ligolang/ligo:0.73.0 taq test unit_pokeGame.jsligo
 ```
 
 Output should give you intermediary logs and finally the test results
