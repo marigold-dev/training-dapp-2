@@ -1,5 +1,3 @@
-#include "pokeGame.jsligo"
+#import "pokeGame.jsligo" "Contract"
 
-// Define your parameter values as a list of LIGO variable definitions
-// E.g. const aParameterValue : aParameterType = (Increment (1));
-
+const default_parameter: parameter_of Contract = Poke();
