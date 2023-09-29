@@ -1,5 +1,6 @@
-#include "pokeGame.jsligo"
-const default_storage = {
-    pokeTraces : Map.empty as map<address, pokeMessage>,
-    feedback : "kiss"
+#import "pokeGame.jsligo" "Contract"
+
+const default_storage: Contract.storage = {
+    pokeTraces: Map.empty as map<address, Contract.pokeMessage>,
+    feedback: "kiss"
 };

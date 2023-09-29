@@ -18,19 +18,7 @@ function App() {
     preferredNetwork: NetworkType.GHOSTNET,
   });
   Tezos.setWalletProvider(wallet);
-
-  const [contracts, setContracts] = useState<Array<api.Contract>>([]);
-
-  const fetchContracts = () => {
-    (async () => {
-      setContracts(
-        await api.contractsGetSimilar(import.meta.env.VITE_CONTRACT_ADDRESS, {
-          includeStorage: true,
-          sort: { desc: "id" },
-        })
-      );
-    })();
-  };
+  const [contractToPoke, setContractToPoke] = useState<string>("");
 
   useEffect(() => {
     (async () => {
@@ -45,7 +33,19 @@ function App() {
 
   const [userAddress, setUserAddress] = useState<string>("");
   const [userBalance, setUserBalance] = useState<number>(0);
-  const [contractToPoke, setContractToPoke] = useState<string>("");
+
+  const [contracts, setContracts] = useState<Array<api.Contract>>([]);
+
+  const fetchContracts = () => {
+    (async () => {
+      setContracts(
+        await api.contractsGetSimilar(import.meta.env.VITE_CONTRACT_ADDRESS, {
+          includeStorage: true,
+          sort: { desc: "id" },
+        })
+      );
+    })();
+  };
 
   //poke
   const poke = async (
@@ -85,53 +85,55 @@ function App() {
         <div>
           I am {userAddress} with {userBalance} mutez
         </div>
-      </header>
 
-      <br />
-      <div>
-        <button onClick={fetchContracts}>Fetch contracts</button>
-        <table>
-          <thead>
-            <tr>
-              <th>address</th>
-              <th>trace "contract - feedback - user"</th>
-              <th>action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {contracts.map((contract) => (
+        <br />
+        <div>
+          <button onClick={fetchContracts}>Fetch contracts</button>
+          <table>
+            <thead>
               <tr>
-                <td style={{ borderStyle: "dotted" }}>{contract.address}</td>
-                <td style={{ borderStyle: "dotted" }}>
-                  {contract.storage !== null &&
-                  contract.storage.pokeTraces !== null &&
-                  Object.entries(contract.storage.pokeTraces).length > 0
-                    ? Object.keys(contract.storage.pokeTraces).map(
-                        (k: string) =>
-                          contract.storage.pokeTraces[k].receiver +
-                          " " +
-                          contract.storage.pokeTraces[k].feedback +
-                          " " +
-                          k +
-                          ", "
-                      )
-                    : ""}
-                </td>
-                <td style={{ borderStyle: "dotted" }}>
-                  <form onSubmit={(e) => poke(e, contract)}>
-                    <input
-                      type="text"
-                      onChange={(e) => setContractToPoke(e.currentTarget.value)}
-                      placeholder="enter contract address here"
-                    />
-                    <button type="submit">Poke</button>
-                  </form>
-                </td>
+                <th>address</th>
+                <th>trace "contract - feedback - user"</th>
+                <th>action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {contracts.map((contract) => (
+                <tr>
+                  <td style={{ borderStyle: "dotted" }}>{contract.address}</td>
+                  <td style={{ borderStyle: "dotted" }}>
+                    {contract.storage !== null &&
+                    contract.storage.pokeTraces !== null &&
+                    Object.entries(contract.storage.pokeTraces).length > 0
+                      ? Object.keys(contract.storage.pokeTraces).map(
+                          (k: string) =>
+                            contract.storage.pokeTraces[k].receiver +
+                            " " +
+                            contract.storage.pokeTraces[k].feedback +
+                            " " +
+                            k +
+                            ", "
+                        )
+                      : ""}
+                  </td>
+                  <td style={{ borderStyle: "dotted" }}>
+                    <form onSubmit={(e) => poke(e, contract)}>
+                      <input
+                        type="text"
+                        onChange={(e) =>
+                          setContractToPoke(e.currentTarget.value)
+                        }
+                        placeholder="enter contract address here"
+                      />
+                      <button type="submit">Poke</button>
+                    </form>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </header>
     </div>
   );
 }
