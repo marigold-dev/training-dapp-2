@@ -201,13 +201,9 @@ export const _testPoke = (
 const testSender1Poke =
   (
     (): unit => {
-      const [taddr, _, _2] =
-        Test.originate_module(
-          contract_of(PokeGame),
-          initial_storage,
-          initial_tez
-        );
-      _testPoke(taddr, sender1);
+      const orig =
+        Test.originate(contract_of(PokeGame), initial_storage, initial_tez);
+      _testPoke(orig.addr, sender1);
     }
   )();
 ```
