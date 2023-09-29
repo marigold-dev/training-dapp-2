@@ -477,7 +477,7 @@ const _4 = Test.set_source(faucet);
 
 const _tests = (
   ta: typed_address<parameter_of PokeGame, PokeGame.storage>,
-  _: michelson_contract,
+  _: michelson_contract<parameter_of PokeGame, PokeGame.storage>,
   _2: int
 ): unit => { return PokeGameTest._testPoke(ta, sender1); };
 
@@ -485,7 +485,7 @@ const test_mutation =
   (
     (): unit => {
       const mutationErrorList =
-        Test.originate_module_and_mutate(
+        Test.originate_and_mutate_all(
           contract_of(PokeGame),
           PokeGameTest.initial_storage,
           PokeGameTest.initial_tez,
@@ -521,22 +521,22 @@ Output :
 
 ```logs
 === Error messages for mutation_pokeGame.jsligo ===
-File "contracts/mutation_pokeGame.jsligo", line 23, characters 65-118:
- 22 |     ([] : list<[unit,mutation]>) => unit,
- 23 |     ([head,..._tail] : list<[unit,mutation]>) => {Test.log(head);Test.assert_with_error(false,Test.to_string(head[1]))}
- 24 |   ]));
+File "contracts/mutation_pokeGame.jsligo", line 43, characters 12-66:
+ 42 |             Test.log(head);
+ 43 |             Test.assert_with_error(false, Test.to_string(head[1]))
+ 44 |           }
 
-Test failed with "Mutation at: File "contracts/pokeGame.jsligo", line 40, characters 26-77:
- 39 |         },
- 40 |     None : () => failwith("Cannot find view feedback on given oracle address")
- 41 |   });
+Test failed with "Mutation at: File "contracts/pokeGame.jsligo", line 52, characters 15-66:
+ 51 |     when (None()):
+ 52 |       failwith("Cannot find view feedback on given oracle address")
+ 53 |   };
 
 Replacing by: "Cannot find view feedback on given oracle addressCannot find view feedback on given oracle address".
 "
 Trace:
-File "contracts/mutation_pokeGame.jsligo", line 23, characters 65-118 ,
-File "contracts/mutation_pokeGame.jsligo", line 23, characters 65-118 ,
-File "contracts/mutation_pokeGame.jsligo", line 19, character 22 to line 26, character 4
+File "contracts/mutation_pokeGame.jsligo", line 43, characters 12-66 ,
+File "contracts/mutation_pokeGame.jsligo", line 43, characters 12-66 ,
+File "contracts/mutation_pokeGame.jsligo", line 28, character 2 to line 47, character 5
 
 
 ===
@@ -551,7 +551,7 @@ File "contracts/mutation_pokeGame.jsligo", line 19, character 22 to line 26, cha
 
 What happened ?
 
-The mutation has alterated a part of the code we did not test and we were not covering it, so the unit test passed.
+The mutation has alterated a part of the code which we did not test, we were not covering it, so the unit test passed.
 
 As we are lazy today, instead of fixing it, we will see that we can also tell the Library to ignore this.
 Go to your source file pokeGame.jsligo, and annotate the function `pokeAndGetFeedback` with `@no_mutation`
@@ -565,7 +565,7 @@ const pokeAndGetFeedback ...
 Run again the mutation tests
 
 ```bash
-TAQ_LIGO_IMAGE=ligolang/ligo:0.73.0 taq test mutation_pokeGame.jsligo
+TAQ_LIGO_IMAGE=ligolang/ligo:1.0.0 taq test mutation_pokeGame.jsligo
 ```
 
 Output
@@ -577,9 +577,9 @@ Output
 │ mutation_pokeGame.jsligo │ "Sender 1 has balance : "                                                                                                                      │
 │                          │ 3800000000000mutez                                                                                                                             │
 │                          │ "contract deployed with values : "                                                                                                             │
-│                          │ KT1DwkBpJuLWJ3ME47c5X2KXAMXvC5opqMQr(None)                                                                                                     │
-│                          │ Success (2161n)                                                                                                                                │
-│                          │ {feedback = "kiss" ; pokeTraces = [tz1TDZG4vFoA2xutZMYauUnS4HVucnAGQSpZ -> {feedback = "" ; receiver = KT1DwkBpJuLWJ3ME47c5X2KXAMXvC5opqMQr}]} │
+│                          │ KT1L8mCbuTJXKq3CDoHDxqfH5aj5sEgAdx9C(None)                                                                                                     │
+│                          │ Success (1330n)                                                                                                                                │
+│                          │ {feedback = "kiss" ; pokeTraces = [tz1hkMbkLPkvhxyqsQoBoLPqb1mruSzZx3zy -> {feedback = "" ; receiver = KT1L8mCbuTJXKq3CDoHDxqfH5aj5sEgAdx9C}]} │
 │                          │ "Sender 1 has balance : "                                                                                                                      │
 │                          │ 3800000000000mutez                                                                                                                             │
 │                          │ Everything at the top-level was executed.                                                                                                      │
@@ -601,10 +601,10 @@ https://github.com/marigold-dev/training-dapp-1/tree/main/solution/app
 
 Redeploy a new version of the smart contract.
 
-> Note : You can set `feedback` value to any action other than `kiss` :kissing: (it will be more fun for tother to discover it)
+> Note : You can set `feedback` value to any action other than default `kiss` string :kissing: (it will be more fun for other to discover it)
 
 ```bash
-TAQ_LIGO_IMAGE=ligolang/ligo:0.73.0 taq compile pokeGame.jsligo
+TAQ_LIGO_IMAGE=ligolang/ligo:1.0.0 taq compile pokeGame.jsligo
 taq generate types ./app/src
 taq deploy pokeGame.tz -e "testing"
 ```
