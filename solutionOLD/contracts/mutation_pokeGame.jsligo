@@ -12,7 +12,7 @@ const sender1: address = Test.nth_bootstrap_account(1);
 
 const _1 = Test.log("Sender 1 has balance : ");
 
-const _2 = Test.log(Test.get_balance_of_address(sender1));
+const _2 = Test.log(Test.get_balance(sender1));
 
 const _3 = Test.set_baker(faucet);
 
@@ -28,7 +28,7 @@ const test_mutation =
   (
     (): unit => {
       const mutationErrorList =
-        Test.originate_module_and_mutate(
+        Test.originate_module_and_mutate_all(
           contract_of(PokeGame),
           PokeGameTest.initial_storage,
           PokeGameTest.initial_tez,

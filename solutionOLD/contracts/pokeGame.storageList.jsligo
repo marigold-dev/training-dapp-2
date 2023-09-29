@@ -1,0 +1,6 @@
+#import "pokeGame.jsligo" "Contract"
+
+const default_storage: Contract.storage = {
+    pokeTraces: Map.empty as map<address, Contract.pokeMessage>,
+    feedback: "kiss"
+};

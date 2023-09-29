@@ -12,7 +12,7 @@ const sender1: address = Test.nth_bootstrap_account(1);
 
 const _2 = Test.log("Sender 1 has balance : ");
 
-const _3 = Test.log(Test.get_balance_of_address(sender1));
+const _3 = Test.log(Test.get_balance(sender1));
 
 const _4 = Test.set_baker(faucet);
 
@@ -65,8 +65,12 @@ export const _testPoke = (
 const testSender1Poke =
   (
     (): unit => {
-      const orig =
-        Test.originate(contract_of(PokeGame), initial_storage, initial_tez);
-      _testPoke(orig.addr, sender1);
+      const [taddr, _, _2] =
+        Test.originate_module(
+          contract_of(PokeGame),
+          initial_storage,
+          initial_tez
+        );
+      _testPoke(taddr, sender1);
     }
   )();
