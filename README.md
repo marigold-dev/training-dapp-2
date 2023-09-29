@@ -421,7 +421,7 @@ Declare the view at the end of the file. Do not forget the annotation `@view` !
 
 ```ligolang
 @view
-const feedback = (_: unit, store: storage): string => { return store.feedback };
+export const feedback = (_: unit, store: storage): string => { return store.feedback };
 ```
 
 Compile the contract
