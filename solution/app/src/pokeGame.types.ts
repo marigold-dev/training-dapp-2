@@ -1,15 +1,23 @@
 
 import { ContractAbstractionFromContractType, WalletContractAbstractionFromContractType } from './type-utils';
-import { address } from './type-aliases';
+import { address, MMap } from './type-aliases';
 
-export type Storage = Array<address>;
+export type Storage = {
+    pokeTraces: MMap<address, {
+        receiver: address;
+        feedback: string;
+    }>;
+    feedback: string;
+};
 
 type Methods = {
-    default: () => Promise<void>;
+    pokeAndGetFeedback: (param: address) => Promise<void>;
+    poke: () => Promise<void>;
 };
 
 type MethodsObject = {
-    default: () => Promise<void>;
+    pokeAndGetFeedback: (param: address) => Promise<void>;
+    poke: () => Promise<void>;
 };
 
 type contractTypes = { methods: Methods, methodsObject: MethodsObject, storage: Storage, code: { __type: 'PokeGameCode', protocol: string, code: object[] } };

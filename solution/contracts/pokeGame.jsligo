@@ -24,6 +24,7 @@ const poke = (_: unit, store: storage): return_ => {
   ];
 };
 
+@no_mutation
 @entry
 const pokeAndGetFeedback = (oracleAddress: address, store: storage): return_ => {
   //Read the feedback view
