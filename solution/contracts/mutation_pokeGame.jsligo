@@ -3,7 +3,6 @@
 #import "./unit_pokeGame.jsligo" "PokeGameTest"
 
 // reset state
-
 const _ = Test.reset_state(2 as nat, list([]) as list<tez>);
 
 const faucet = Test.nth_bootstrap_account(0);

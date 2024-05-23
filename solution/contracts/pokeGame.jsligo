@@ -7,10 +7,8 @@ export type storage = {
 
 type return_ = [list<operation>, storage];
 
-type returned_feedback = [address, string]; //address that gives feedback and a string message
-
-
-type oracle_param = contract<returned_feedback>;
+//type returned_feedback = [address, string]; //address that gives feedback and a string message
+//type oracle_param = contract<returned_feedback>;
 
 @entry
 const poke = (_: unit, store: storage): return_ => {
@@ -24,11 +22,26 @@ const poke = (_: unit, store: storage): return_ => {
   ];
 };
 
+/*
+@entry
+const getFeedback = (
+  contract_callback: contract<returned_feedback>,
+  store: storage
+): return_ => {
+  let op: operation =
+    Tezos.transaction(
+      [Tezos.get_self_address(), store.feedback],
+      (0 as mutez),
+      contract_callback
+    );
+  return [list([op]), store];
+};
+*/
+
 @no_mutation
 @entry
 const pokeAndGetFeedback = (oracleAddress: address, store: storage): return_ => {
   //Read the feedback view
-
   let feedbackOpt: option<string> =
     Tezos.call_view("feedback", unit, oracleAddress);
   match(feedbackOpt) {
@@ -51,6 +64,21 @@ const pokeAndGetFeedback = (oracleAddress: address, store: storage): return_ => 
       failwith("Cannot find view feedback on given oracle address")
   };
 };
+
+/*
+
+@entry
+const pokeAndGetFeedbackCallback = (feedback: returned_feedback, store: storage): return_ => {
+  let feedbackMessage = { receiver: feedback[0], feedback: feedback[1] };
+  return [
+    list([]) as list<operation>,
+    {
+      ...store,
+      pokeTraces: Map.add(Tezos.get_source(), feedbackMessage, store.pokeTraces)
+    }
+  ];
+};
+*/
 
 @view
 export const feedback = (_: unit, store: storage): string => {

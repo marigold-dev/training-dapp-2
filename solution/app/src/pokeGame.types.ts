@@ -1,6 +1,6 @@
 
 import { ContractAbstractionFromContractType, WalletContractAbstractionFromContractType } from './type-utils';
-import { address, MMap } from './type-aliases';
+import { address, MMap, unit } from './type-aliases';
 
 export type Storage = {
     pokeTraces: MMap<address, {
@@ -14,6 +14,9 @@ type Methods = {
     pokeAndGetFeedback: (param: address) => Promise<void>;
     poke: () => Promise<void>;
 };
+
+export type PokeAndGetFeedbackParams = address
+export type PokeParams = unit
 
 type MethodsObject = {
     pokeAndGetFeedback: (param: address) => Promise<void>;

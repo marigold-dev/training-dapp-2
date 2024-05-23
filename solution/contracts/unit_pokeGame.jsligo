@@ -3,7 +3,6 @@
 export type main_fn = module_contract<parameter_of PokeGame, PokeGame.storage>;
 
 // reset state
-
 const _ = Test.reset_state(2 as nat, list([]) as list<tez>);
 
 const faucet = Test.nth_bootstrap_account(0);
@@ -26,7 +25,6 @@ export const initial_storage = {
 export const initial_tez = 0mutez;
 
 //functions
-
 export const _testPoke = (
   taddr: typed_address<parameter_of PokeGame, PokeGame.storage>,
   s: address
@@ -41,7 +39,6 @@ export const _testPoke = (
   const store: PokeGame.storage = Test.get_storage(taddr);
   Test.log(store);
   //check poke is registered
-
   match(Map.find_opt(s, store.pokeTraces)) {
     when (Some(pokeMessage)):
       do {
@@ -61,7 +58,6 @@ export const _testPoke = (
 };
 
 // TESTS //
-
 const testSender1Poke =
   (
     (): unit => {
