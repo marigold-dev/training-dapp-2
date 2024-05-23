@@ -1,8 +1,8 @@
 ---
 title: "Part 2: Inter-contract calls and testing"
-authors: "Benjamin Fuentes"
+authors: "Benjamin Fuentes (Marigold)"
 last_update:
-  date: 28 November 2023
+date: 22 May 2024
 ---
 
 Previously, you learned how to create your first dApp.
@@ -12,7 +12,7 @@ In this second session, you will enhance your skills on:
 - How to use views.
 - How to do unit & mutation tests.
 
-On the first version of the poke game, you were able to poke any deployed contract. Now, you will add a new function to store on the trace an additional feedback message coming from another contract.
+On the first version of the Poke game, you were able to poke any deployed contract. Now, you will add a new function to store on the trace an additional feedback message coming from another contract.
 
 ## Poke and Get Feedback sequence diagram
 
@@ -45,10 +45,9 @@ cd solution && npm i && cd app && yarn install && cd ..
 
 Change the storage to reflect the changes:
 
-- If you poke directly, you just register the contract's owner address and no feedback.
+- If you poke directly, you must register the contract's owner's address and no feedback.
 - If you poke and ask to get feedback from another contract, then you register the other contract address and an additional feedback message.
-
-Here the new sequence diagram of the poke function.
+  Here is the new sequence diagram of the poke function.
 
 ```mermaid
 sequenceDiagram
@@ -57,9 +56,9 @@ sequenceDiagram
   Note left of Smartcontract1: store User address + no feedback
 ```
 
-1. Edit `./contracts/pokeGame.jsligo` and replace storage definition by this one:
+1. Edit `./contracts/pokeGame.jsligo` and replace the storage definition with this one:
 
-   ```ligolang
+   ```jsligo
    export type pokeMessage = {
        receiver : address,
        feedback : string
@@ -71,9 +70,9 @@ sequenceDiagram
    };
    ```
 
-1. Replace your poke function with theses lines:
+1. Replace your poke function with these lines:
 
-   ```ligolang
+   ```jsligo
    @entry
    const poke = (_ : unit, store : storage) : return_ => {
        let feedbackMessage = {receiver : Tezos.get_self_address() ,feedback: ""};
@@ -84,15 +83,15 @@ sequenceDiagram
 
    Explanation:
 
-   - `...store` do a copy by value of your object. [Have a look on the Functional updates documentation](https://ligolang.org/docs/language-basics/maps-records/#functional-updates). Note: you cannot do assignment like this `store.pokeTraces=...` in jsLigo, there are no concept of Classes, use `Functional updates` instead.
+   - `...store` do a copy by value of your object. [Have a look on the Functional updates documentation](https://ligolang.org/docs/language-basics/maps-records/#functional-updates). Note: you cannot do an assignment like this `store.pokeTraces=...` in jsLIGO, there are no concepts of Classes, use `Functional updates` instead.
    - `Map.add(...`: Add a key, value entry to a map. For more information about [Map](https://ligolang.org/docs/language-basics/maps-records/#maps).
    - `export type storage = {...};` a `Record` type is declared, it is an [object structure](https://ligolang.org/docs/language-basics/maps-records#records).
-   - `Tezos.get_self_address()` is a native function that returns the current contract address running this code. Have a look on [Tezos native functions](https://ligolang.org/docs/reference/current-reference).
-   - `feedback: ""`: poking directly does not store feedbacks.
+   - `Tezos.get_self_address()` is a native function that returns the current contract address running this code. Have a look at [Tezos native functions](https://ligolang.org/docs/reference/current-reference).
+   - `feedback: ""`: poking directly does not store feedback.
 
 1. Edit `pokeGame.storageList.jsligo` to change the storage initialization.
 
-   ```ligolang
+   ```jsligo
    #import "pokeGame.jsligo" "Contract"
 
    const default_storage: Contract.storage = {
@@ -104,7 +103,7 @@ sequenceDiagram
 1. Compile your contract.
 
    ```bash
-   TAQ_LIGO_IMAGE=ligolang/ligo:1.1.0 taq compile pokeGame.jsligo
+   TAQ_LIGO_IMAGE=ligolang/ligo:1.6.0 taq compile pokeGame.jsligo
    ```
 
    Write a second function `pokeAndGetFeedback` involving the call to another contract a bit later, let's do unit testing first!
@@ -122,7 +121,7 @@ sequenceDiagram
 
 1. Edit the file.
 
-   ```ligolang
+   ```jsligo
    #import "./pokeGame.jsligo" "PokeGame"
 
    export type main_fn = module_contract<parameter_of PokeGame, PokeGame.storage>;
@@ -199,26 +198,26 @@ sequenceDiagram
 
    Explanations:
 
-   - `#import "./pokeGame.jsligo" "PokeGame"` to import the source file as module in order to call functions and use object definitions.
+   - `#import "./pokeGame.jsligo" "PokeGame"` to import the source file as a module to call functions and use object definitions.
    - `export type main_fn` it will be useful later for the mutation tests to point to the main function to call/mutate.
    - `Test.reset_state ( 2...` this creates two implicit accounts on the test environment.
-   - `Test.nth_bootstrap_account` this return the nth account from the environment.
-   - `Test.to_contract(taddr)` and `Tezos.address(contr)` are util functions to convert typed addresses, contract and contract addresses.
+   - `Test.nth_bootstrap_account` This returns the nth account from the environment.
+   - `Test.to_contract(taddr)` and `Tezos.address(contr)` are util functions to convert typed addresses, contract, and contract addresses.
    - `let _testPoke = (s : address) : unit => {...}` declaring function starting with `_` is escaping the test for execution. Use this to factorize tests changing only the parameters of the function for different scenarios.
    - `Test.set_source` do not forget to set this value for the transaction signer.
    - `Test.transfer_to_contract(CONTRACT, PARAMS, TEZ_COST)` A transaction to send, it returns an operation.
-   - `Test.get_storage` this is how to retrieve the contract's storage.
+   - `Test.get_storage` This is how to retrieve the contract's storage.
    - `assert_with_error(CONDITION,MESSAGE)` Use assertion for unit testing.
    - `const testSender1Poke = ...` This test function will be part of the execution report.
    - `Test.originate_module(MODULE_CONVERTED_TO_CONTRACT,INIT_STORAGE, INIT_BALANCE)` It originates a smart contract into the Test environment. A module is converted to a smart contract.
 
-1. Run the test.
+1. Run the test
 
    ```bash
-   TAQ_LIGO_IMAGE=ligolang/ligo:1.1.0 taq test unit_pokeGame.jsligo
+   TAQ_LIGO_IMAGE=ligolang/ligo:1.6.0 taq test unit_pokeGame.jsligo
    ```
 
-   Output should give you intermediary logs and finally the test results.
+   The output should give you intermediary logs and finally the test results.
 
    ```logs
    ┌──────────────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -237,11 +236,11 @@ sequenceDiagram
    └──────────────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
    ```
 
-## Do an inter contract call
+## Do an inter-contract call
 
-To keep things simple, 2 versions of the same smart contract are deployed to simulate inter-contract call and get the feedback message (cf. [sequence diagram](#poke-and-get-feedback-sequence-diagram)).
+To keep things simple, 2 versions of the same smart contract are deployed to simulate inter-contract calls and get the feedback message (cf. [sequence diagram](#poke-and-get-feedback-sequence-diagram)).
 
-Create a new poke function `PokeAndGetFeedback: (other : address)` with a second part function `PokeAndGetFeedbackCallback: (feedback : returned_feedback)` as a callback. Calling a contract is asynchronous, this is the reason it is done in two times.
+Create a new poke function `PokeAndGetFeedback: (other : address)` with a second part function `PokeAndGetFeedbackCallback: (feedback : returned_feedback)` as a callback. Calling a contract is asynchronous, this is the reason it is done two times.
 
 The function to call on the second contract is `GetFeedback: (contract_callback: oracle_param)` and returns a feedback message.
 
@@ -249,7 +248,7 @@ The function to call on the second contract is `GetFeedback: (contract_callback:
 
 1. Edit the file `pokeGame.jsligo`, to define new types:
 
-   ```ligolang
+   ```jsligo
    type returned_feedback = [address, string]; //address that gives feedback and a string message
 
    type oracle_param = contract<returned_feedback>;
@@ -262,7 +261,7 @@ The function to call on the second contract is `GetFeedback: (contract_callback:
 
 1. Write the missing functions, starting with `getFeedback`. Add this new function at the end of the file.
 
-   ```ligolang
+   ```jsligo
    @entry
    const getFeedback = (contract_callback : contract<returned_feedback>, store : storage): return_ => {
        let op : operation = Tezos.transaction(
@@ -278,7 +277,7 @@ The function to call on the second contract is `GetFeedback: (contract_callback:
 
 1. Add now, the first part of the function `pokeAndGetFeedback`.
 
-   ```ligolang
+   ```jsligo
    @entry
    const pokeAndGetFeedback = (oracleAddress: address, store: storage): return_ => {
      //Prepares call to oracle
@@ -316,7 +315,7 @@ The function to call on the second contract is `GetFeedback: (contract_callback:
 
 1. Write the last missing function `pokeAndGetFeedbackCallback`, receive the feedback and finally store it.
 
-   ```ligolang
+   ```jsligo
    @entry
    const pokeAndGetFeedbackCallback = (feedback : returned_feedback, store : storage) : return_ => {
        let feedbackMessage = {receiver : feedback[0] ,feedback: feedback[1]};
@@ -330,21 +329,19 @@ The function to call on the second contract is `GetFeedback: (contract_callback:
 
 1. Compile the contract.
 
-   > Note: Remove the file `pokeGame.parameterList.jsligo` to remove all unnecessary error logs as there is need to maintain this file anymore.
-
    ```bash
-   TAQ_LIGO_IMAGE=ligolang/ligo:1.1.0 taq compile pokeGame.jsligo
+   TAQ_LIGO_IMAGE=ligolang/ligo:1.6.0 taq compile pokeGame.jsligo
    ```
 
 1. (Optional) Write a unit test for this new function `pokeAndGetFeedback`.
 
 ## Use views instead of inter-contract call
 
-As you saw on the previous step, inter-contract calls makes the business logic more complex but not only, [thinking about the cost is even worst](https://ligolang.org/docs/tutorials/inter-contract-calls/?lang=jsligo#a-note-on-complexity).
+As you saw in the previous step, inter-contract calls make the business logic more complex but not only that, [thinking about the cost is even worse](https://ligolang.org/docs/tutorials/inter-contract-calls/?lang=jsligo#a-note-on-complexity).
 
 In this training, the oracle is providing a read-only storage that can be replaced by a `view` instead of a complex and costly callback.
 
-[See documentation here about onchain views](https://ligolang.org/docs/protocol/hangzhou#on-chain-views).
+[See the documentation here about onchain views](https://ligolang.org/docs/protocol/hangzhou#on-chain-views).
 
 ```mermaid
 sequenceDiagram
@@ -362,7 +359,7 @@ sequenceDiagram
 
 1. Edit function `pokeAndGetFeedback` to call view instead of a transaction.
 
-   ```ligolang
+   ```jsligo
    @entry
    const pokeAndGetFeedback = (oracleAddress: address, store: storage): return_ => {
      //Read the feedback view
@@ -393,7 +390,7 @@ sequenceDiagram
 
 1. Declare the view at the end of the file. Do not forget the annotation `@view` !
 
-   ```ligolang
+   ```jsligo
    @view
    export const feedback = (_: unit, store: storage): string => { return store.feedback };
    ```
@@ -401,14 +398,14 @@ sequenceDiagram
 1. Compile the contract.
 
    ```bash
-   TAQ_LIGO_IMAGE=ligolang/ligo:1.1.0 taq compile pokeGame.jsligo
+   TAQ_LIGO_IMAGE=ligolang/ligo:1.6.0 taq compile pokeGame.jsligo
    ```
 
 1. (Optional) Write a unit test for the updated function `pokeAndGetFeedback`.
 
 ## Write mutation tests
 
-Ligo provides mutations testing through the Test library. Mutation tests are like `testing your tests` to see if your unit tests coverage is strong enough. Bugs, or mutants, are automatically inserted into your code. Your tests are run on each mutant.
+LIGO provides mutation testing through the Test library. Mutation tests are like `testing your tests` to see if your unit test coverage is strong enough. Bugs, or mutants, are automatically inserted into your code. Your tests are run on each mutant.
 
 If your tests fail then the mutant is killed. If your tests passed, the mutant survived.
 The higher the percentage of mutants killed, the more effective your tests are.
@@ -423,7 +420,7 @@ The higher the percentage of mutants killed, the more effective your tests are.
 
 1. Edit the file.
 
-   ```ligolang
+   ```jsligo
    #import "./pokeGame.jsligo" "PokeGame"
 
    #import "./unit_pokeGame.jsligo" "PokeGameTest"
@@ -478,12 +475,12 @@ The higher the percentage of mutants killed, the more effective your tests are.
    - `#import <SRC_FILE> <NAMESPACE>`: import your source code that will be mutated and your unit tests. For more information [module doc](https://ligolang.org/docs/language-basics/modules).
    - `const _tests = (ta: typed_address<parameter_of PokeGame, PokeGame.storage>, _: michelson_contract, _: int) : unit => {...`: you need to provide the test suite that will be run by the framework. Just point to the unit test you want to run.
    - `const test_mutation = (() : unit => {`: this is the definition of the mutations tests.
-   - `Test.originate_module_and_mutate_all(CONTRACT_TO_MUTATE, INIT_STORAGE, INIT_TEZ_COST, UNIT_TEST_TO_RUN)`: This will take the first argument as the source code to mutate and the last argument as unit test suite function to run over. It returns a list of mutations that succeed (if size > 0 then bad test coverage) or empty list (good, even mutants did not harm your code).
+   - `Test.originate_module_and_mutate_all(CONTRACT_TO_MUTATE, INIT_STORAGE, INIT_TEZ_COST, UNIT_TEST_TO_RUN)`: This will take the first argument as the source code to mutate and the last argument as unit test suite function to run over. It returns a list of mutations that succeed (if size > 0 then bad test coverage) or an empty list (good, even mutants did not harm your code).
 
 1. Run the test.
 
    ```bash
-   TAQ_LIGO_IMAGE=ligolang/ligo:1.1.0 taq test mutation_pokeGame.jsligo
+   TAQ_LIGO_IMAGE=ligolang/ligo:1.6.0 taq test mutation_pokeGame.jsligo
    ```
 
    Output:
@@ -518,15 +515,15 @@ The higher the percentage of mutants killed, the more effective your tests are.
 
    Invaders are here.
 
-   What happened ?
+   What happened?
 
-   The mutation has altered a part of the code which is not tested, it was not covered, so the unit test passed.
+   The mutation has altered a part of the code that is not tested, it was not covered, so the unit test passed.
 
    For a short fix, tell the Library to ignore this function for mutants.
 
 1. Go to your source file pokeGame.jsligo, and annotate the function `pokeAndGetFeedback` with `@no_mutation`.
 
-   ```ligolang
+   ```jsligo
    @no_mutation
    @entry
    const pokeAndGetFeedback ...
@@ -535,7 +532,7 @@ The higher the percentage of mutants killed, the more effective your tests are.
 1. Run again the mutation tests.
 
    ```bash
-   TAQ_LIGO_IMAGE=ligolang/ligo:1.1.0 taq test mutation_pokeGame.jsligo
+   TAQ_LIGO_IMAGE=ligolang/ligo:1.6.0 taq test mutation_pokeGame.jsligo
    ```
 
    Output
@@ -561,14 +558,14 @@ The higher the percentage of mutants killed, the more effective your tests are.
 
 ## Update the frontend
 
-1. Reuse the dApp files from [previous session](https://github.com/marigold-dev/training-dapp-1/tree/main/solution/app).
+1. Reuse the dApp files from [the previous session](https://github.com/marigold-dev/training-dapp-1/tree/main/solution/app).
 
 1. Redeploy a new version of the smart contract.
 
    > Note: You can set `feedback` value to any action other than default `kiss` string (it is more fun for other to discover it).
 
    ```bash
-   TAQ_LIGO_IMAGE=ligolang/ligo:1.1.0 taq compile pokeGame.jsligo
+   TAQ_LIGO_IMAGE=ligolang/ligo:1.6.0 taq compile pokeGame.jsligo
    taq generate types ./app/src
    taq deploy pokeGame.tz -e "testing"
    ```
@@ -579,7 +576,7 @@ The higher the percentage of mutants killed, the more effective your tests are.
    import { address } from "./type-aliases";
    ```
 
-1. Add new React variable after `userBalance` definition.
+1. Add a new React variable after `userBalance` definition.
 
    ```typescript
    const [contractToPoke, setContractToPoke] = useState<string>("");
@@ -596,7 +593,7 @@ The higher the percentage of mutants killed, the more effective your tests are.
      e.preventDefault();
      let c: PokeGameWalletType = await Tezos.wallet.at("" + contract.address);
      try {
-       const op = await c.methods
+       const op = await c.methodsObject
          .pokeAndGetFeedback(contractToPoke as address)
          .send();
        await op.confirmation();
@@ -624,20 +621,18 @@ The higher the percentage of mutants killed, the more effective your tests are.
    yarn dev
    ```
 
-   On the listed contract, choose your line and input the address of the contract you will receive a feedback. Click on `poke`.
+   On the listed contract, choose your line and input the address of the contract you will receive feedback. Click on `poke`.
 
    ![The dApp page showing the result of the poke action](/img/tutorials/dapp-result.png).
 
-   This time, the logged user will receive a feedback from a targeted contract (as input of the form) via any listed contract (the first column of the table).
+   This time, the logged user will receive feedback from a targeted contract (as input of the form) via any listed contract (the first column of the table).
+   Refresh manually by clicking on `Fetch` contracts` button.
 
-1. Refresh manually clicking on `Fetch contracts` button.
-
-   Poke other developer's contract to discover their contract hidden feedback when you poke them.
+   Poke other developer's contracts to discover their contract hidden feedback when you poke them.
 
 ## Summary
 
-Now, you are able to call other contracts, use views and test you smart contract before deploying it.
-
-On next training, you will learn how to use tickets.
+Now, you can call other contracts, use views, and test your smart contract before deploying it.
+In the next training, you will learn how to use tickets.
 
 When you are ready, continue to [Part 3: Tickets](./part-3).
